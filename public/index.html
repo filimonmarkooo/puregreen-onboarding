@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pure Green | Franchise Onboarding Portal</title>
+<link rel="stylesheet" href="/css/brand.css">
+<style>
+  body { background: var(--pg-offwhite); display: flex; flex-direction: column; min-height: 100vh; }
+
+  .hero {
+    background: var(--pg-dark-green);
+    padding: 80px 24px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 70% 50%, rgba(135,206,33,0.15) 0%, transparent 60%);
+  }
+  .hero-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .hero-logo-text {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 32px;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+  .hero-logo-text span { color: var(--pg-light-green); }
+  .hero h1 {
+    font-family: var(--font-headline);
+    font-size: 52px;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .hero h1 em { color: var(--pg-light-green); font-style: normal; }
+  .hero p {
+    color: rgba(255,255,255,0.75);
+    font-size: 17px;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+    position: relative;
+  }
+
+  .auth-section {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 24px 64px;
+  }
+  .auth-box {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+  }
+  .auth-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 2px solid var(--pg-grey);
+  }
+  .auth-tab {
+    padding: 18px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: #aaa;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .auth-tab.active { color: var(--pg-dark-green); border-bottom-color: var(--pg-dark-green); }
+
+  .auth-panel { display: none; padding: 32px; }
+  .auth-panel.active { display: block; }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--pg-light-green);
+    margin-bottom: 6px;
+  }
+  .section-title {
+    font-family: var(--font-headline);
+    font-size: 28px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--pg-dark-green);
+    margin-bottom: 24px;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media(max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+  .divider { text-align: center; margin: 18px 0; color: #ccc; font-size: 13px; }
+  .forgot-link {
+    display: block;
+    text-align: right;
+    font-size: 13px;
+    color: var(--pg-dark-green);
+    text-decoration: none;
+    margin-top: -10px;
+    margin-bottom: 20px;
+  }
+  .forgot-link:hover { text-decoration: underline; }
+
+  .register-note {
+    font-size: 13px;
+    color: #888;
+    text-align: center;
+    margin-top: 16px;
+    line-height: 1.5;
+  }
+
+  footer {
+    background: var(--pg-dark-green);
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  footer span { color: var(--pg-light-green); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-logo">
+    <svg viewBox="0 0 40 40" width="44" height="44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="20" cy="20" rx="16" ry="20" fill="#87CE21" transform="rotate(-20 20 20)"/>
+      <ellipse cx="20" cy="20" rx="10" ry="14" fill="#046A38" transform="rotate(-20 20 20)"/>
+    </svg>
+    <span class="hero-logo-text">pure<span>green</span></span>
+  </div>
+  <h1>Franchise<br><em>Onboarding</em> Portal</h1>
+  <p>Your step-by-step guide to getting your Pure Green location live and ready to serve customers.</p>
+</div>
+
+<div class="auth-section">
+  <div class="auth-box">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchTab('register')">New Location</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="auth-panel active" id="panel-login">
+      <div class="section-label">Welcome Back</div>
+      <div class="section-title">Sign In</div>
+      <div class="alert alert-error" id="login-error"></div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" type="email" id="login-email" placeholder="your@email.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="login-password" placeholder="••••••••" />
+      </div>
+      <a href="/forgot-password.html" class="forgot-link">Forgot your password?</a>
+      <button class="btn btn-primary btn-full" onclick="handleLogin()" id="login-btn">Sign In to Dashboard</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="auth-panel" id="panel-register">
+      <div class="section-label">Getting Started</div>
+      <div class="section-title">Register Your Location</div>
+      <div class="alert alert-error" id="reg-error"></div>
+      <div class="alert alert-success" id="reg-success"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Store Name</label>
+          <input class="form-input" type="text" id="reg-storeName" placeholder="Pure Green Miami" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Owner Name</label>
+          <input class="form-input" type="text" id="reg-ownerName" placeholder="Jane Smith" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Store Address</label>
+        <input class="form-input" type="text" id="reg-storeAddress" placeholder="123 Main St, Miami, FL 33101" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Planned Open Date</label>
+          <input class="form-input" type="date" id="reg-openDate" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input class="form-input" type="email" id="reg-email" placeholder="you@email.com" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" id="reg-password" placeholder="Min 8 characters" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <input class="form-input" type="password" id="reg-confirm" placeholder="Repeat password" />
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="handleRegister()" id="reg-btn">Create My Onboarding Account</button>
+      <p class="register-note">Once registered, the Pure Green corporate team will be notified and your onboarding checklist will be ready immediately.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  &copy; 2024 <span>Pure Green</span> Franchise &nbsp;·&nbsp; Onboarding Portal &nbsp;·&nbsp; puregreenfranchise.com
+</footer>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('panel-login').classList.toggle('active', tab==='login');
+  document.getElementById('panel-register').classList.toggle('active', tab==='register');
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideAlerts(...ids) { ids.forEach(id => document.getElementById(id).classList.remove('show')); }
+
+async function handleLogin() {
+  hideAlerts('login-error');
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) return showError('login-error', 'Please enter your email and password.');
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, password}), credentials: 'include'
+    });
+    const data = await res.json();
+    if (!res.ok) { showError('login-error', data.error || 'Login failed'); btn.disabled=false; btn.textContent='Sign In to Dashboard'; return; }
+    window.location.href = data.redirect;
+  } catch { showError('login-error', 'Network error. Please try again.'); btn.disabled=false; btn.textContent='Sign In to Dashboard'; }
+}
+
+async function handleRegister() {
+  hideAlerts('reg-error','reg-success');
+  const storeName = document.getElementById('reg-storeName').value.trim();
+  const ownerName = document.getElementById('reg-ownerName').value.trim();
+  const storeAddress = document.getElementById('reg-storeAddress').value.trim();
+  const plannedOpenDate = document.getElementById('reg-openDate').value;
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirm = document.getElementById('reg-confirm').value;
+  if (!storeName||!ownerName||!storeAddress||!plannedOpenDate||!email||!password) return showError('reg-error','Please fill in all fields.');
+  if (password.length < 8) return showError('reg-error','Password must be at least 8 characters.');
+  if (password !== confirm) return showError('reg-error','Passwords do not match.');
+  const btn = document.getElementById('reg-btn');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({storeName,ownerName,storeAddress,plannedOpenDate,email,password}), credentials: 'include'
+    });
+    const data = await res.json();
+    if (!res.ok) { showError('reg-error', data.error || 'Registration failed'); btn.disabled=false; btn.textContent='Create My Onboarding Account'; return; }
+    window.location.href = data.redirect;
+  } catch { showError('reg-error','Network error. Please try again.'); btn.disabled=false; btn.textContent='Create My Onboarding Account'; }
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key==='Enter') {
+    if (document.getElementById('panel-login').classList.contains('active')) handleLogin();
+    else handleRegister();
+  }
+});
+
+// Redirect if already logged in
+fetch('/api/auth/me', {credentials:'include'}).then(r=>r.json()).then(d => {
+  if (d.user) window.location.href = d.user.role==='admin' ? '/admin.html' : '/dashboard.html';
+});
+</script>
+</body>
+</html>

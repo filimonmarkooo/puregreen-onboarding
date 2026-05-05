@@ -1,0 +1,171 @@
+/* ── Pure Green Brand System ───────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito+Sans:wght@400;600;700&family=Space+Mono:wght@700&display=swap');
+
+:root {
+  --pg-dark-green: #046A38;
+  --pg-light-green: #87CE21;
+  --pg-offwhite: #FAFAFA;
+  --pg-charcoal: #4A5056;
+  --pg-white: #FFFFFF;
+  --pg-grey: #D3DEE3;
+  --pg-tan: #E4DEDB;
+  --pg-yellow: #FFF3CD;
+  --pg-orange: #FF912E;
+
+  /* Typography mapping */
+  --font-headline: 'Barlow Condensed', sans-serif; /* Sub for Alternate Gothic */
+  --font-body: 'Nunito Sans', sans-serif;           /* Sub for Gotham Rounded */
+  --font-mono: 'Space Mono', monospace;             /* Sub for Basis Grotesque Mono */
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: var(--font-body);
+  background: var(--pg-offwhite);
+  color: var(--pg-charcoal);
+  min-height: 100vh;
+}
+
+/* ── Logo ──────────────────────────────────────────────── */
+.pg-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.pg-logo svg { width: 32px; height: 32px; }
+.pg-logo-text {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--pg-charcoal);
+  letter-spacing: -0.3px;
+}
+.pg-logo-text span { color: var(--pg-light-green); }
+
+/* ── Buttons ───────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 28px;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+}
+.btn-primary { background: var(--pg-dark-green); color: white; }
+.btn-primary:hover { background: #035c30; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(4,106,56,0.3); }
+.btn-secondary { background: var(--pg-light-green); color: white; }
+.btn-secondary:hover { background: #78bb1a; }
+.btn-outline { background: transparent; border: 2px solid var(--pg-dark-green); color: var(--pg-dark-green); }
+.btn-outline:hover { background: var(--pg-dark-green); color: white; }
+.btn-full { width: 100%; }
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ── Form Elements ─────────────────────────────────────── */
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--pg-charcoal);
+  margin-bottom: 7px;
+}
+.form-input, .form-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--pg-grey);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--pg-charcoal);
+  background: white;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.form-input:focus, .form-select:focus { border-color: var(--pg-dark-green); }
+.form-input.error { border-color: #e74c3c; }
+
+/* ── Cards ─────────────────────────────────────────────── */
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--pg-grey);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-body { padding: 24px; }
+
+/* ── Platform badges ──────────────────────────────────── */
+.platform-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.badge-square   { background: #f0f7f4; color: var(--pg-dark-green); border: 1px solid #c3ddd1; }
+.badge-ubereats { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+.badge-doordash { background: #fff0ed; color: #c0392b; border: 1px solid #f5b7b1; }
+.badge-grubhub  { background: #fdf0ff; color: #8e44ad; border: 1px solid #dba3f5; }
+.badge-stream   { background: #e8f4fd; color: #1565c0; border: 1px solid #90caf9; }
+
+/* ── Progress bar ──────────────────────────────────────── */
+.progress-wrap { background: var(--pg-grey); border-radius: 99px; height: 10px; overflow: hidden; }
+.progress-bar { background: var(--pg-dark-green); height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+.progress-bar.complete { background: var(--pg-light-green); }
+
+/* ── Alerts ────────────────────────────────────────────── */
+.alert {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  display: none;
+}
+.alert.show { display: block; }
+.alert-error { background: #fdecea; color: #c0392b; border-left: 3px solid #e74c3c; }
+.alert-success { background: #eafaf1; color: #1e8449; border-left: 3px solid var(--pg-light-green); }
+
+/* ── Top nav ────────────────────────────────────────────── */
+.topnav {
+  background: white;
+  border-bottom: 2px solid var(--pg-grey);
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .topnav { padding: 0 16px; }
+}

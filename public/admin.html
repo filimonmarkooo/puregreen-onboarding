@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pure Green | Admin Dashboard</title>
+<link rel="stylesheet" href="/css/brand.css">
+<style>
+  body { background: #f0f4f2; }
+  .topnav-brand { font-family: var(--font-body); font-weight: 700; font-size: 20px; color: var(--pg-charcoal); }
+  .topnav-brand span { color: var(--pg-light-green); }
+  .admin-badge { background: var(--pg-dark-green); color: white; font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; }
+  .main { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  @media(max-width: 700px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card { background: white; border-radius: 10px; padding: 20px 24px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
+  .stat-val { font-family: var(--font-headline); font-size: 36px; font-weight: 700; color: var(--pg-dark-green); }
+  .stat-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: #aaa; margin-top: 4px; }
+  .tab-bar { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn { padding: 9px 20px; border-radius: 6px; background: none; border: 2px solid transparent; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; color: #888; transition: all 0.2s; }
+  .tab-btn.active { background: var(--pg-dark-green); color: white; }
+  .franchisee-grid { display: flex; flex-direction: column; gap: 12px; }
+  .franchisee-card { background: white; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); overflow: hidden; border: 2px solid transparent; transition: border-color 0.2s; }
+  .franchisee-card:hover { border-color: var(--pg-grey); }
+  .fc-header { display: flex; align-items: center; gap: 16px; padding: 18px 24px; cursor: pointer; }
+  .fc-avatar { width: 44px; height: 44px; background: var(--pg-dark-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-family: var(--font-headline); font-size: 18px; font-weight: 700; flex-shrink: 0; text-transform: uppercase; }
+  .fc-info { flex: 1; }
+  .fc-name { font-weight: 700; font-size: 16px; color: var(--pg-charcoal); }
+  .fc-meta { font-size: 12px; color: #999; margin-top: 2px; }
+  .fc-progress-col { display: flex; align-items: center; gap: 10px; min-width: 200px; }
+  .fc-pct { font-family: var(--font-headline); font-size: 22px; font-weight: 700; color: var(--pg-dark-green); white-space: nowrap; }
+  .fc-bar-wrap { flex: 1; background: var(--pg-grey); border-radius: 99px; height: 8px; }
+  .fc-bar { background: var(--pg-dark-green); height: 100%; border-radius: 99px; transition: width 0.5s; }
+  .fc-bar.done { background: var(--pg-light-green); }
+  .fc-expand { color: #ccc; font-size: 18px; transition: transform 0.2s; }
+  .franchisee-card.open .fc-expand { transform: rotate(180deg); }
+  .fc-detail { display: none; border-top: 1px solid var(--pg-grey); }
+  .franchisee-card.open .fc-detail { display: block; }
+  .fc-detail-inner { padding: 24px; }
+  .fc-info-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  @media(max-width: 600px) { .fc-info-row { grid-template-columns: 1fr; } }
+  .fc-info-item label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: #aaa; display: block; margin-bottom: 4px; }
+  .fc-info-item span { font-size: 14px; font-weight: 600; color: var(--pg-charcoal); }
+  .pt-platform-header { font-family: var(--font-headline); font-size: 16px; font-weight: 700; text-transform: uppercase; color: var(--pg-dark-green); margin: 16px 0 8px; display: flex; align-items: center; gap: 10px; }
+  .pt-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--pg-offwhite); border-radius: 8px; font-size: 14px; margin-bottom: 4px; }
+  .pt-check { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .pt-check.done { background: var(--pg-light-green); color: white; }
+  .pt-check.pending { background: var(--pg-grey); }
+  .pt-title { flex: 1; }
+  .pt-item.done .pt-title { color: #888; text-decoration: line-through; }
+  .pt-date { font-family: var(--font-mono); font-size: 10px; color: #aaa; white-space: nowrap; }
+  .pt-proof { font-size: 11px; color: var(--pg-dark-green); font-weight: 600; text-decoration: none; }
+  .video-edit-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .video-edit-input { flex: 1; }
+  .video-status { font-size: 12px; color: var(--pg-light-green); margin-top: 4px; display: none; }
+  .section-heading { font-family: var(--font-headline); font-size: 26px; font-weight: 700; text-transform: uppercase; color: var(--pg-dark-green); margin-bottom: 16px; }
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+  .loading { text-align: center; padding: 60px; color: #aaa; }
+  .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid var(--pg-grey); border-top-color: var(--pg-dark-green); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Task Manager styles ── */
+  .tm-platform-block { margin-bottom: 32px; }
+  .tm-platform-header {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--pg-dark-green); color: white;
+    padding: 12px 20px; border-radius: 10px 10px 0 0;
+  }
+  .tm-platform-name { font-family: var(--font-headline); font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tm-task-list { background: white; border: 2px solid var(--pg-grey); border-top: none; border-radius: 0 0 10px 10px; overflow: hidden; }
+  .tm-task-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px; border-bottom: 1px solid #f0f0f0;
+    transition: background 0.15s;
+  }
+  .tm-task-row:last-child { border-bottom: none; }
+  .tm-task-row:hover { background: #fafcfa; }
+  .tm-task-num { font-family: var(--font-mono); font-size: 11px; color: #bbb; width: 24px; flex-shrink: 0; }
+  .tm-task-info { flex: 1; }
+  .tm-task-title { font-weight: 700; font-size: 14px; color: var(--pg-charcoal); }
+  .tm-task-desc { font-size: 12px; color: #999; margin-top: 2px; line-height: 1.4; }
+  .tm-task-meta { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+  .tm-pill { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 99px; }
+  .tm-pill-upload { background: #e8f4fd; color: #1565c0; }
+  .tm-pill-custom { background: #fff3e0; color: #e65100; }
+  .tm-pill-video { background: #eafaf1; color: #1e8449; }
+  .tm-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-edit { background: #f0f7f4; color: var(--pg-dark-green); border: 1px solid #c3ddd1; border-radius: 5px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+  .btn-edit:hover { background: #d9ede4; }
+  .btn-del { background: #fdecea; color: #c0392b; border: 1px solid #f5b7b1; border-radius: 5px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+  .btn-del:hover { background: #fadbd8; }
+  .tm-add-row { padding: 14px 20px; background: #f8fff2; border-top: 2px dashed #c8e6c9; }
+  .tm-add-btn { display: flex; align-items: center; gap: 8px; background: none; border: none; color: var(--pg-dark-green); font-weight: 700; font-size: 14px; cursor: pointer; padding: 0; font-family: var(--font-body); }
+  .tm-add-btn:hover { color: var(--pg-light-green); }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 24px; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: white; border-radius: 14px; padding: 32px; max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.2); }
+  .modal-title { font-family: var(--font-headline); font-size: 24px; font-weight: 700; text-transform: uppercase; color: var(--pg-dark-green); margin-bottom: 24px; }
+  .modal-footer { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+  .checkbox-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .checkbox-row input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--pg-dark-green); }
+  .checkbox-row label { font-family: var(--font-body); font-size: 14px; color: var(--pg-charcoal); font-weight: 600; cursor: pointer; }
+  .new-platform-block { background: white; border: 2px dashed var(--pg-grey); border-radius: 10px; padding: 24px; text-align: center; margin-bottom: 20px; }
+
+  /* Internal admin tasks */
+  .internal-tasks-section { margin-top: 24px; border-top: 2px solid var(--pg-grey); padding-top: 20px; }
+  .internal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .internal-title { font-family: var(--font-headline); font-size: 18px; font-weight: 700; text-transform: uppercase; color: #c0392b; display: flex; align-items: center; gap: 8px; }
+  .internal-badge { background: #fdecea; color: #c0392b; font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; padding: 3px 8px; border-radius: 99px; border: 1px solid #f5b7b1; }
+  .internal-platform-group { margin-bottom: 14px; }
+  .internal-platform-label { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #aaa; margin-bottom: 6px; }
+  .internal-task-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #fff9f9; border: 1px solid #fde; border-radius: 8px; margin-bottom: 4px; }
+  .internal-task-row.done { background: #f8fff2; border-color: #c8e6c9; }
+  .internal-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #f5b7b1; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; background: white; font-size: 12px; font-weight: 700; color: white; }
+  .internal-task-row.done .internal-check { background: var(--pg-light-green); border-color: var(--pg-light-green); }
+  .internal-task-title { flex: 1; font-size: 14px; color: var(--pg-charcoal); }
+  .internal-task-row.done .internal-task-title { text-decoration: line-through; color: #aaa; }
+  .internal-del { color: #ddd; font-size: 16px; cursor: pointer; border: none; background: none; padding: 0; transition: color 0.15s; }
+  .internal-del:hover { color: #c0392b; }
+  .internal-add-row { display: flex; gap: 8px; margin-top: 8px; }
+  .internal-add-row select { flex: 0 0 140px; }
+  .internal-add-row input { flex: 1; }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="topnav-brand">pure<span>green</span></div>
+    <span class="admin-badge">Corporate Admin</span>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <button class="btn btn-outline btn-sm" onclick="loadData()">↻ Refresh</button>
+    <button class="btn btn-outline btn-sm" onclick="logout()">Sign Out</button>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="loading" id="loading"><div class="spinner"></div><div>Loading dashboard…</div></div>
+  <div id="content" style="display:none">
+
+    <div class="stats-row" id="stats-row"></div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('franchisees', this)">All Locations</button>
+      <button class="tab-btn" onclick="switchTab('tasks', this)">Manage Tasks</button>
+      <button class="tab-btn" onclick="switchTab('videos', this)">Tutorial Videos</button>
+    </div>
+
+    <!-- FRANCHISEES TAB -->
+    <div class="tab-section active" id="tab-franchisees">
+      <div style="font-family:var(--font-headline);font-size:26px;font-weight:700;text-transform:uppercase;color:var(--pg-dark-green);margin-bottom:16px;">Active Locations</div>
+      <div class="franchisee-grid" id="franchisee-grid"></div>
+    </div>
+
+    <!-- TASK MANAGER TAB -->
+    <div class="tab-section" id="tab-tasks">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div class="section-heading" style="margin-bottom:0">Manage Tasks</div>
+        <button class="btn btn-secondary btn-sm" onclick="openAddPlatformModal()">+ Add New Platform</button>
+      </div>
+      <p style="font-size:14px;color:#888;margin-bottom:24px;">Add, edit, or delete tasks from any platform. New tasks appear immediately on all franchisee dashboards.</p>
+      <div id="task-manager-list"></div>
+    </div>
+
+    <!-- VIDEOS TAB -->
+    <div class="tab-section" id="tab-videos">
+      <div class="section-heading">Tutorial Video Links</div>
+      <p style="font-size:14px;color:#888;margin-bottom:20px;">Paste a YouTube or Loom link next to any task. Franchisees will see a "Watch Tutorial" button on that task immediately.</p>
+      <div id="video-task-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD / EDIT TASK MODAL -->
+<div class="modal-overlay" id="task-modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Add New Task</div>
+    <div class="alert alert-error" id="modal-error"></div>
+    <div class="form-group">
+      <label class="form-label">Platform</label>
+      <select class="form-input" id="modal-platform" id="modal-platform">
+        <option value="Square">Square</option>
+        <option value="Uber Eats">Uber Eats</option>
+        <option value="DoorDash">DoorDash</option>
+        <option value="Grubhub">Grubhub</option>
+        <option value="Stream">Stream</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Task Title</label>
+      <input class="form-input" type="text" id="modal-task-title" placeholder="e.g. Set up loyalty program" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description / Instructions</label>
+      <textarea class="form-input" id="modal-task-desc" rows="3" style="resize:vertical" placeholder="Step-by-step instructions for the franchisee…"></textarea>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="modal-requires-upload" />
+      <label for="modal-requires-upload">Require franchisee to upload proof (screenshot, document, etc.)</label>
+    </div>
+    <div class="form-group" id="modal-upload-label-group" style="display:none">
+      <label class="form-label">Upload Instructions</label>
+      <input class="form-input" type="text" id="modal-upload-label" placeholder="e.g. Screenshot of completed setup" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="saveTask()">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PLATFORM MODAL -->
+<div class="modal-overlay" id="platform-modal">
+  <div class="modal">
+    <div class="modal-title">Add New Platform</div>
+    <div class="alert alert-error" id="platform-error"></div>
+    <div class="form-group">
+      <label class="form-label">Platform Name</label>
+      <input class="form-input" type="text" id="new-platform-name" placeholder="e.g. Toast POS, Yelp, etc." />
+    </div>
+    <p style="font-size:13px;color:#888;margin-bottom:16px;">After adding the platform, you can add tasks to it from the task manager.</p>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closePlatformModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addPlatform()">Add Platform</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allFranchisees = [];
+let allTasks = [];
+let customPlatforms = [];
+let editingTaskId = null;
+
+const BASE_PLATFORMS = ['Square', 'Uber Eats', 'DoorDash', 'Grubhub', 'Stream'];
+const PLATFORM_COLORS = { 'Square':'badge-square','Uber Eats':'badge-ubereats','DoorDash':'badge-doordash','Grubhub':'badge-grubhub','Stream':'badge-stream' };
+
+function getPlatformList() {
+  const fromTasks = [...new Set(allTasks.map(t => t.platform))];
+  const all = [...new Set([...BASE_PLATFORMS, ...fromTasks, ...customPlatforms])];
+  return all;
+}
+
+async function init() {
+  const me = await fetch('/api/auth/me', {credentials:'include'}).then(r=>r.json());
+  if (!me.user) return window.location.href = '/';
+  if (me.user.role !== 'admin') return window.location.href = '/dashboard.html';
+  await loadData();
+}
+
+async function loadData() {
+  document.getElementById('loading').style.display = '';
+  document.getElementById('content').style.display = 'none';
+  try {
+    [allFranchisees, allTasks] = await Promise.all([
+      fetch('/api/admin/franchisees', {credentials:'include'}).then(r=>r.json()),
+      fetch('/api/tasks/admin/all', {credentials:'include'}).then(r=>r.json())
+    ]);
+    renderStats();
+    renderFranchisees();
+    renderTaskManager();
+    renderVideoManager();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = '';
+  } catch(e) {
+    document.getElementById('loading').innerHTML = '<p style="color:red">Failed to load. Please refresh.</p>';
+  }
+}
+
+function renderStats() {
+  const total = allFranchisees.length;
+  const completed = allFranchisees.filter(f => f.pct === 100).length;
+  const inProgress = allFranchisees.filter(f => f.pct > 0 && f.pct < 100).length;
+  const notStarted = allFranchisees.filter(f => f.pct === 0).length;
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-label">Total Locations</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--pg-light-green)">${completed}</div><div class="stat-label">Fully Onboarded</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--pg-orange)">${inProgress}</div><div class="stat-label">In Progress</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#ccc">${notStarted}</div><div class="stat-label">Not Started</div></div>
+  `;
+}
+
+function renderFranchisees() {
+  if (!allFranchisees.length) {
+    document.getElementById('franchisee-grid').innerHTML = '<div style="text-align:center;padding:48px;color:#aaa;font-family:var(--font-mono);font-size:13px;letter-spacing:1px;">NO LOCATIONS REGISTERED YET</div>';
+    return;
+  }
+  document.getElementById('franchisee-grid').innerHTML = allFranchisees.map(f => `
+    <div class="franchisee-card" id="fc-${f.id}">
+      <div class="fc-header" onclick="toggleFranchisee('${f.id}')">
+        <div class="fc-avatar">${f.storeName.charAt(0)}</div>
+        <div class="fc-info">
+          <div class="fc-name">${escHtml(f.storeName)}</div>
+          <div class="fc-meta">${escHtml(f.ownerName)} · ${escHtml(f.storeAddress)}</div>
+        </div>
+        <div class="fc-progress-col">
+          <div class="fc-pct">${f.pct}%</div>
+          <div class="fc-bar-wrap"><div class="fc-bar${f.pct===100?' done':''}" style="width:${f.pct}%"></div></div>
+          <span style="font-family:var(--font-mono);font-size:11px;color:#aaa">${f.completedCount}/${f.totalCount}</span>
+        </div>
+        <span class="fc-expand">▾</span>
+      </div>
+      <div class="fc-detail"><div class="fc-detail-inner" id="fc-detail-${f.id}"><div style="text-align:center;padding:20px;color:#aaa;">Loading…</div></div></div>
+    </div>
+  `).join('');
+}
+
+async function toggleFranchisee(id) {
+  const card = document.getElementById('fc-' + id);
+  const isOpen = card.classList.contains('open');
+  card.classList.toggle('open', !isOpen);
+  if (!isOpen) await loadFranchiseeDetail(id);
+}
+
+async function loadFranchiseeDetail(id) {
+  const f = allFranchisees.find(x => x.id === id);
+  const [tasks, adminTasks] = await Promise.all([
+    fetch('/api/tasks/user/' + id, {credentials:'include'}).then(r=>r.json()),
+    fetch('/api/admin/franchisees/' + id + '/admin-tasks', {credentials:'include'}).then(r=>r.json())
+  ]);
+  const detail = document.getElementById('fc-detail-' + id);
+  const platforms = getPlatformList();
+  const byPlatform = {};
+  platforms.forEach(p => byPlatform[p] = []);
+  tasks.forEach(t => { if (!byPlatform[t.platform]) byPlatform[t.platform] = []; byPlatform[t.platform].push(t); });
+
+  let html = `<div class="fc-info-row">
+    <div class="fc-info-item"><label>Email</label><span>${escHtml(f.email)}</span></div>
+    <div class="fc-info-item"><label>Planned Open</label><span>${formatDate(f.plannedOpenDate)}</span></div>
+    <div class="fc-info-item"><label>Registered</label><span>${formatDate(f.createdAt)}</span></div>
+  </div>`;
+
+  platforms.forEach(platform => {
+    const pts = byPlatform[platform];
+    if (!pts || !pts.length) return;
+    const done = pts.filter(t => t.completed).length;
+    html += `<div class="pt-platform-header"><span class="platform-badge ${PLATFORM_COLORS[platform]||'badge-square'}">${platform}</span><span style="font-size:12px;color:#aaa;font-family:var(--font-mono)">${done}/${pts.length}</span></div>`;
+    pts.forEach(task => {
+      html += `<div class="pt-item${task.completed?' done':''}">
+        <div class="pt-check ${task.completed?'done':'pending'}">${task.completed?'✓':''}</div>
+        <div class="pt-title">${escHtml(task.title)}</div>
+        ${task.uploadPath ? `<a class="pt-proof" href="${task.uploadPath}" target="_blank">View Proof</a>` : ''}
+        ${task.completedAt ? `<div class="pt-date">${formatDate(task.completedAt)}</div>` : ''}
+      </div>`;
+    });
+  });
+
+  // Internal admin tasks section
+  const byAdminPlatform = {};
+  adminTasks.forEach(t => { if (!byAdminPlatform[t.platform]) byAdminPlatform[t.platform] = []; byAdminPlatform[t.platform].push(t); });
+  const totalAdmin = adminTasks.length;
+  const doneAdmin = adminTasks.filter(t => t.completed).length;
+
+  html += `<div class="internal-tasks-section">
+    <div class="internal-header">
+      <div class="internal-title">
+        🔒 Internal Admin Checklist
+        <span class="internal-badge">ADMIN ONLY — NOT VISIBLE TO FRANCHISEE</span>
+      </div>
+      <span style="font-family:var(--font-mono);font-size:11px;color:#aaa">${doneAdmin}/${totalAdmin} done</span>
+    </div>`;
+
+  const allPlatforms = getPlatformList();
+  allPlatforms.forEach(platform => {
+    const pts = byAdminPlatform[platform] || [];
+    if (pts.length) {
+      html += `<div class="internal-platform-group">
+        <div class="internal-platform-label">${escHtml(platform)}</div>`;
+      pts.forEach(t => {
+        html += `<div class="internal-task-row${t.completed?' done':''}" id="atr-${t.id}">
+          <div class="internal-check" onclick="toggleInternalTask('${t.id}', ${!t.completed}, '${id}')">${t.completed?'✓':''}</div>
+          <div class="internal-task-title">${escHtml(t.title)}</div>
+          <button class="internal-del" onclick="deleteInternalTask('${t.id}', '${id}')">✕</button>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+  });
+
+  // Add new internal task form
+  const platformOptions = allPlatforms.map(p => `<option value="${escHtml(p)}">${escHtml(p)}</option>`).join('');
+  html += `
+    <div class="internal-add-row">
+      <select class="form-input" id="iat-platform-${id}" style="flex:0 0 140px;font-size:13px;padding:9px 12px">${platformOptions}</select>
+      <input class="form-input" type="text" id="iat-title-${id}" placeholder="Add internal task..." style="font-size:13px;padding:9px 12px" onkeydown="if(event.key==='Enter') addInternalTask('${id}')" />
+      <button class="btn btn-sm" style="background:#c0392b;color:white;border:none;cursor:pointer;border-radius:6px;padding:9px 16px;font-weight:700;white-space:nowrap" onclick="addInternalTask('${id}')">+ Add</button>
+    </div>
+  </div>`;
+
+  detail.innerHTML = html;
+}
+
+async function addInternalTask(franchiseeId) {
+  const platform = document.getElementById('iat-platform-' + franchiseeId).value;
+  const title = document.getElementById('iat-title-' + franchiseeId).value.trim();
+  if (!title) return;
+  const res = await fetch('/api/admin/franchisees/' + franchiseeId + '/admin-tasks', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ platform, title }), credentials: 'include'
+  });
+  if (res.ok) { await loadFranchiseeDetail(franchiseeId); }
+}
+
+async function toggleInternalTask(taskId, completed, franchiseeId) {
+  await fetch('/api/admin/admin-tasks/' + taskId + '/toggle', {
+    method: 'PATCH', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ completed }), credentials: 'include'
+  });
+  await loadFranchiseeDetail(franchiseeId);
+}
+
+async function deleteInternalTask(taskId, franchiseeId) {
+  if (!confirm('Delete this internal task?')) return;
+  await fetch('/api/admin/admin-tasks/' + taskId, { method: 'DELETE', credentials: 'include' });
+  await loadFranchiseeDetail(franchiseeId);
+}
+
+// ── TASK MANAGER ──────────────────────────────────────────
+
+function renderTaskManager() {
+  const platforms = getPlatformList();
+  const byPlatform = {};
+  platforms.forEach(p => byPlatform[p] = []);
+  allTasks.forEach(t => { if (!byPlatform[t.platform]) byPlatform[t.platform] = []; byPlatform[t.platform].push(t); });
+
+  let html = '';
+  platforms.forEach(platform => {
+    const tasks = byPlatform[platform] || [];
+    html += `
+      <div class="tm-platform-block">
+        <div class="tm-platform-header">
+          <span class="tm-platform-name">${escHtml(platform)}</span>
+          <span style="font-family:var(--font-mono);font-size:11px;opacity:0.7">${tasks.length} task${tasks.length!==1?'s':''}</span>
+        </div>
+        <div class="tm-task-list">
+          ${tasks.map((task, i) => `
+            <div class="tm-task-row" id="tmrow-${task.id}">
+              <span class="tm-task-num">${i+1}</span>
+              <div class="tm-task-info">
+                <div class="tm-task-title">${escHtml(task.title)}</div>
+                ${task.description ? `<div class="tm-task-desc">${escHtml(task.description.substring(0,100))}${task.description.length>100?'…':''}</div>` : ''}
+                <div class="tm-task-meta">
+                  ${task.requiresUpload ? '<span class="tm-pill tm-pill-upload">Requires Upload</span>' : ''}
+                  ${task.isCustom ? '<span class="tm-pill tm-pill-custom">Custom</span>' : ''}
+                  ${task.videoUrl ? '<span class="tm-pill tm-pill-video">Has Video</span>' : ''}
+                </div>
+              </div>
+              <div class="tm-actions">
+                <button class="btn-edit" onclick="openEditModal('${task.id}')">✏️ Edit</button>
+                <button class="btn-del" onclick="deleteTask('${task.id}', '${escHtml(task.title).replace(/'/g,"\\'")}')">🗑 Delete</button>
+              </div>
+            </div>
+          `).join('')}
+          <div class="tm-add-row">
+            <button class="tm-add-btn" onclick="openAddModal('${escHtml(platform)}')">
+              <span style="font-size:20px;color:var(--pg-light-green)">+</span> Add task to ${escHtml(platform)}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  document.getElementById('task-manager-list').innerHTML = html;
+}
+
+function openAddModal(platform) {
+  editingTaskId = null;
+  document.getElementById('modal-title').textContent = 'Add New Task';
+  document.getElementById('modal-task-title').value = '';
+  document.getElementById('modal-task-desc').value = '';
+  document.getElementById('modal-requires-upload').checked = false;
+  document.getElementById('modal-upload-label').value = '';
+  document.getElementById('modal-upload-label-group').style.display = 'none';
+  document.getElementById('modal-save-btn').textContent = 'Add Task';
+  document.getElementById('modal-error').classList.remove('show');
+
+  // Rebuild platform dropdown with all current platforms + custom ones
+  rebuildPlatformDropdown(platform);
+
+  document.getElementById('task-modal').classList.add('show');
+}
+
+function openEditModal(taskId) {
+  const task = allTasks.find(t => t.id === taskId);
+  if (!task) return;
+  editingTaskId = taskId;
+  document.getElementById('modal-title').textContent = 'Edit Task';
+  document.getElementById('modal-task-title').value = task.title;
+  document.getElementById('modal-task-desc').value = task.description || '';
+  document.getElementById('modal-requires-upload').checked = !!task.requiresUpload;
+  document.getElementById('modal-upload-label').value = task.uploadLabel || '';
+  document.getElementById('modal-upload-label-group').style.display = task.requiresUpload ? '' : 'none';
+  document.getElementById('modal-save-btn').textContent = 'Save Changes';
+  document.getElementById('modal-error').classList.remove('show');
+  rebuildPlatformDropdown(task.platform);
+  document.getElementById('task-modal').classList.add('show');
+}
+
+function rebuildPlatformDropdown(selectedPlatform) {
+  const platforms = getPlatformList();
+  const sel = document.getElementById('modal-platform');
+  sel.innerHTML = platforms.map(p => `<option value="${escHtml(p)}" ${p===selectedPlatform?'selected':''}>${escHtml(p)}</option>`).join('');
+}
+
+document.getElementById('modal-requires-upload').addEventListener('change', function() {
+  document.getElementById('modal-upload-label-group').style.display = this.checked ? '' : 'none';
+});
+
+async function saveTask() {
+  const title = document.getElementById('modal-task-title').value.trim();
+  const platform = document.getElementById('modal-platform').value;
+  const description = document.getElementById('modal-task-desc').value.trim();
+  const requiresUpload = document.getElementById('modal-requires-upload').checked;
+  const uploadLabel = document.getElementById('modal-upload-label').value.trim();
+  const errEl = document.getElementById('modal-error');
+
+  if (!title) { errEl.textContent = 'Task title is required.'; errEl.classList.add('show'); return; }
+  errEl.classList.remove('show');
+
+  const btn = document.getElementById('modal-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    let res, data;
+    if (editingTaskId) {
+      res = await fetch('/api/tasks/admin/' + editingTaskId, {
+        method: 'PATCH', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ title, description, requiresUpload, uploadLabel, platform }), credentials: 'include'
+      });
+    } else {
+      res = await fetch('/api/tasks/admin/create', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ platform, title, description, requiresUpload, uploadLabel }), credentials: 'include'
+      });
+    }
+    data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Failed to save.'; errEl.classList.add('show'); btn.disabled=false; btn.textContent='Save Task'; return; }
+
+    closeModal();
+    await loadData();
+    switchTab('tasks', document.querySelector('.tab-btn:nth-child(2)'));
+  } catch(e) { errEl.textContent = 'Network error. Try again.'; errEl.classList.add('show'); }
+  btn.disabled=false; btn.textContent = editingTaskId ? 'Save Changes' : 'Add Task';
+}
+
+async function deleteTask(taskId, taskTitle) {
+  if (!confirm(`Delete task "${taskTitle}"?\n\nThis will also remove all franchisee completions for this task. This cannot be undone.`)) return;
+  const res = await fetch('/api/tasks/admin/' + taskId, { method: 'DELETE', credentials: 'include' });
+  if (res.ok) { await loadData(); switchTab('tasks', document.querySelector('.tab-btn:nth-child(2)')); }
+  else { const d = await res.json(); alert(d.error || 'Failed to delete task.'); }
+}
+
+function openAddPlatformModal() {
+  document.getElementById('new-platform-name').value = '';
+  document.getElementById('platform-error').classList.remove('show');
+  document.getElementById('platform-modal').classList.add('show');
+}
+
+function addPlatform() {
+  const name = document.getElementById('new-platform-name').value.trim();
+  const errEl = document.getElementById('platform-error');
+  if (!name) { errEl.textContent = 'Please enter a platform name.'; errEl.classList.add('show'); return; }
+  if (getPlatformList().map(p=>p.toLowerCase()).includes(name.toLowerCase())) {
+    errEl.textContent = 'That platform already exists.'; errEl.classList.add('show'); return;
+  }
+  customPlatforms.push(name);
+  closePlatformModal();
+  renderTaskManager();
+  // Auto-switch to task manager tab
+  switchTab('tasks', document.querySelector('.tab-btn:nth-child(2)'));
+  // Scroll to bottom
+  setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+}
+
+function closeModal() { document.getElementById('task-modal').classList.remove('show'); }
+function closePlatformModal() { document.getElementById('platform-modal').classList.remove('show'); }
+
+// Close modals on overlay click
+document.getElementById('task-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+document.getElementById('platform-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closePlatformModal(); });
+
+// ── VIDEO MANAGER ─────────────────────────────────────────
+
+function renderVideoManager() {
+  const platforms = getPlatformList();
+  const byPlatform = {};
+  platforms.forEach(p => byPlatform[p] = []);
+  allTasks.forEach(t => { if (!byPlatform[t.platform]) byPlatform[t.platform] = []; byPlatform[t.platform].push(t); });
+
+  let html = '';
+  platforms.forEach(platform => {
+    const tasks = byPlatform[platform] || [];
+    if (!tasks.length) return;
+    html += `<div style="margin-bottom:28px;">
+      <div style="font-family:var(--font-headline);font-size:20px;font-weight:700;text-transform:uppercase;color:var(--pg-dark-green);margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+        <span class="platform-badge ${PLATFORM_COLORS[platform]||'badge-square'}">${platform}</span>
+      </div>`;
+    tasks.forEach(task => {
+      html += `<div style="background:white;border-radius:8px;padding:16px 20px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+        <div style="font-weight:700;font-size:14px;margin-bottom:8px;">${escHtml(task.title)}</div>
+        <div class="video-edit-row">
+          <input class="form-input video-edit-input" type="url" id="vid-${task.id}" value="${escHtml(task.videoUrl||'')}" placeholder="https://youtube.com/watch?v=..." />
+          <button class="btn btn-primary btn-sm" onclick="saveVideoUrl('${task.id}')">Save</button>
+          ${task.videoUrl ? `<button class="btn btn-sm btn-outline" onclick="clearVideoUrl('${task.id}')">Clear</button>` : ''}
+        </div>
+        <div class="video-status" id="vstatus-${task.id}">✓ Saved!</div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  document.getElementById('video-task-list').innerHTML = html;
+}
+
+async function saveVideoUrl(taskId) {
+  const url = document.getElementById('vid-' + taskId).value.trim();
+  const res = await fetch('/api/tasks/' + taskId + '/video', { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({videoUrl:url}), credentials:'include' });
+  if (res.ok) {
+    const s = document.getElementById('vstatus-' + taskId);
+    s.style.display = 'block';
+    setTimeout(() => { s.style.display = 'none'; }, 2000);
+    const t = allTasks.find(t => t.id === taskId);
+    if (t) t.videoUrl = url;
+  }
+}
+
+async function clearVideoUrl(taskId) {
+  document.getElementById('vid-' + taskId).value = '';
+  await saveVideoUrl(taskId);
+  renderVideoManager();
+}
+
+// ── TABS ──────────────────────────────────────────────────
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+async function logout() {
+  await fetch('/api/auth/logout', {method:'POST', credentials:'include'});
+  window.location.href = '/';
+}
+
+function escHtml(s) { if(!s)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDate(d) { if(!d)return''; try { return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch { return d; } }
+
+init();
+</script>
+</body>
+</html>

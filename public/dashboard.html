@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pure Green | My Onboarding Dashboard</title>
+<link rel="stylesheet" href="/css/brand.css">
+<style>
+  body { background: #f4f6f5; }
+
+  .topnav-brand { font-family: var(--font-body); font-weight: 700; font-size: 20px; color: var(--pg-charcoal); }
+  .topnav-brand span { color: var(--pg-light-green); }
+  .topnav-right { display: flex; align-items: center; gap: 16px; }
+  .user-pill {
+    background: var(--pg-offwhite);
+    border: 1px solid var(--pg-grey);
+    border-radius: 99px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--pg-charcoal);
+  }
+
+  .main { max-width: 900px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* Store header */
+  .store-header {
+    background: var(--pg-dark-green);
+    border-radius: 14px;
+    padding: 28px 32px;
+    color: white;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .store-header::before {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(135,206,33,0.15);
+  }
+  .store-header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+  .store-name { font-family: var(--font-headline); font-size: 32px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .store-meta { font-size: 14px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+  .overall-pct { font-family: var(--font-headline); font-size: 48px; font-weight: 700; color: var(--pg-light-green); text-align: right; white-space: nowrap; }
+  .overall-pct small { display: block; font-size: 13px; font-family: var(--font-mono); letter-spacing: 1px; color: rgba(255,255,255,0.6); text-align: right; text-transform: uppercase; }
+  .store-progress-wrap { background: rgba(255,255,255,0.2); border-radius: 99px; height: 8px; }
+  .store-progress-bar { background: var(--pg-light-green); height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+  .store-progress-label { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: rgba(255,255,255,0.6); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Platform section */
+  .platform-section { margin-bottom: 24px; }
+  .platform-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .platform-header-left { display: flex; align-items: center; gap: 12px; }
+  .platform-name { font-family: var(--font-headline); font-size: 22px; font-weight: 700; text-transform: uppercase; color: var(--pg-dark-green); }
+  .platform-count { font-family: var(--font-mono); font-size: 12px; color: #999; letter-spacing: 1px; }
+  .platform-mini-progress { display: flex; align-items: center; gap: 10px; }
+  .platform-mini-bar { width: 100px; background: var(--pg-grey); border-radius: 99px; height: 6px; }
+  .platform-mini-fill { background: var(--pg-dark-green); height: 100%; border-radius: 99px; transition: width 0.4s; }
+  .chevron { font-size: 18px; color: #aaa; transition: transform 0.2s; }
+  .platform-section.collapsed .chevron { transform: rotate(-90deg); }
+  .platform-section.collapsed .task-list { display: none; }
+
+  /* Task item */
+  .task-list { display: flex; flex-direction: column; gap: 10px; }
+  .task-item {
+    background: white;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+    overflow: hidden;
+  }
+  .task-item.completed { border-color: var(--pg-light-green); background: #f8fff2; }
+  .task-item-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+  }
+  .task-check {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2.5px solid var(--pg-grey);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    background: white;
+  }
+  .task-item.completed .task-check { background: var(--pg-light-green); border-color: var(--pg-light-green); }
+  .check-icon { display: none; color: white; font-size: 14px; font-weight: 700; }
+  .task-item.completed .check-icon { display: block; }
+  .task-title { font-weight: 700; font-size: 15px; color: var(--pg-charcoal); flex: 1; }
+  .task-item.completed .task-title { color: #777; text-decoration: line-through; }
+  .task-completed-date { font-family: var(--font-mono); font-size: 10px; color: var(--pg-light-green); letter-spacing: 0.5px; white-space: nowrap; }
+  .task-expand-btn { color: #bbb; font-size: 18px; transition: transform 0.2s; flex-shrink: 0; }
+  .task-item.open .task-expand-btn { transform: rotate(180deg); }
+
+  /* Task body */
+  .task-body { display: none; padding: 0 20px 20px 60px; }
+  .task-item.open .task-body { display: block; }
+  .task-description { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 16px; }
+
+  /* Video tutorial */
+  .video-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff3e0;
+    border: 1px solid #ffcc80;
+    color: #e65100;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 16px;
+    transition: background 0.2s;
+  }
+  .video-link:hover { background: #ffe0b2; }
+
+  /* Upload area */
+  .upload-area {
+    border: 2px dashed var(--pg-grey);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .upload-area:hover, .upload-area.dragover { border-color: var(--pg-dark-green); background: #f0f7f4; }
+  .upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-text { font-size: 13px; color: #888; }
+  .upload-text strong { color: var(--pg-dark-green); }
+  .upload-preview { font-size: 13px; color: var(--pg-dark-green); font-weight: 600; margin-top: 6px; }
+
+  /* Credentials fields */
+  .credentials-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  @media(max-width:480px) { .credentials-grid { grid-template-columns: 1fr; } }
+  .cred-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: #888; margin-bottom: 5px; }
+
+  /* Complete btn */
+  .complete-btn { background: var(--pg-dark-green); color: white; border: none; border-radius: 6px; padding: 11px 22px; font-family: var(--font-body); font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .complete-btn:hover { background: #035c30; }
+  .complete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Proof display */
+  .proof-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--pg-dark-green); font-weight: 600; text-decoration: none; margin-bottom: 12px; }
+  .proof-link:hover { text-decoration: underline; }
+
+  /* Loading */
+  .loading { text-align: center; padding: 60px; color: #aaa; }
+  .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid var(--pg-grey); border-top-color: var(--pg-dark-green); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-brand">pure<span>green</span> <span style="color:#ccc;font-weight:400;">/ onboarding</span></div>
+  <div class="topnav-right">
+    <span class="user-pill" id="user-name">Loading…</span>
+    <button class="btn btn-outline btn-sm" onclick="logout()">Sign Out</button>
+  </div>
+</nav>
+
+<div class="main" id="main">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div>Loading your dashboard…</div>
+  </div>
+</div>
+
+<script>
+let userData = null;
+let tasksData = [];
+let taskOverrides = {};
+
+const PLATFORM_ORDER = ['Square', 'Uber Eats', 'DoorDash', 'Grubhub', 'Stream'];
+const PLATFORM_COLORS = {
+  'Square': 'badge-square',
+  'Uber Eats': 'badge-ubereats',
+  'DoorDash': 'badge-doordash',
+  'Grubhub': 'badge-grubhub',
+  'Stream': 'badge-stream'
+};
+
+async function init() {
+  const me = await fetch('/api/auth/me', {credentials:'include'}).then(r=>r.json());
+  if (!me.user) return window.location.href = '/';
+  if (me.user.role === 'admin') return window.location.href = '/admin.html';
+  userData = me.user;
+  document.getElementById('user-name').textContent = userData.storeName;
+
+  // Load task overrides for video URLs
+  try {
+    const adminTasks = await fetch('/api/tasks/admin/all', {credentials:'include'}).then(r=>r.json());
+    if (Array.isArray(adminTasks)) {
+      adminTasks.forEach(t => { if (t.videoUrl) taskOverrides[t.id] = t.videoUrl; });
+    }
+  } catch(e) {}
+
+  tasksData = await fetch('/api/tasks', {credentials:'include'}).then(r=>r.json());
+  // Merge video overrides
+  tasksData = tasksData.map(t => ({ ...t, videoUrl: taskOverrides[t.id] || t.videoUrl }));
+  render();
+}
+
+function render() {
+  const completed = tasksData.filter(t => t.completed).length;
+  const total = tasksData.length;
+  const pct = total ? Math.round((completed / total) * 100) : 0;
+
+  const byPlatform = {};
+  PLATFORM_ORDER.forEach(p => byPlatform[p] = []);
+  tasksData.forEach(t => { if (byPlatform[t.platform]) byPlatform[t.platform].push(t); });
+
+  let html = `
+    <div class="store-header">
+      <div class="store-header-top">
+        <div>
+          <div class="store-name">${escHtml(userData.storeName)}</div>
+          <div class="store-meta">${escHtml(userData.ownerName)} &nbsp;·&nbsp; Opens ${formatDate(userData.plannedOpenDate)}</div>
+        </div>
+        <div class="overall-pct">${pct}%<small>complete</small></div>
+      </div>
+      <div class="store-progress-wrap"><div class="store-progress-bar" style="width:${pct}%"></div></div>
+      <div class="store-progress-label"><span>${completed} of ${total} tasks done</span><span>${total - completed} remaining</span></div>
+    </div>
+  `;
+
+  PLATFORM_ORDER.forEach(platform => {
+    const tasks = byPlatform[platform];
+    if (!tasks.length) return;
+    const done = tasks.filter(t => t.completed).length;
+    const pPct = Math.round((done / tasks.length) * 100);
+
+    html += `
+      <div class="platform-section" id="section-${platform.replace(/\s/g,'-')}">
+        <div class="platform-header" onclick="toggleSection('${platform.replace(/\s/g,'-')}')">
+          <div class="platform-header-left">
+            <span class="platform-badge ${PLATFORM_COLORS[platform]}">${platform}</span>
+            <span class="platform-count">${done}/${tasks.length} complete</span>
+          </div>
+          <div class="platform-mini-progress">
+            <div class="platform-mini-bar"><div class="platform-mini-fill" style="width:${pPct}%"></div></div>
+            <span style="font-family:var(--font-mono);font-size:12px;color:#aaa;">${pPct}%</span>
+            <span class="chevron">▾</span>
+          </div>
+        </div>
+        <div class="task-list">
+          ${tasks.map(t => renderTask(t)).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('main').innerHTML = html;
+}
+
+function renderTask(task) {
+  const hasVideo = task.videoUrl;
+  const isCompleted = task.completed;
+
+  let bodyHtml = `<div class="task-description">${escHtml(task.description)}</div>`;
+
+  if (hasVideo) {
+    bodyHtml += `<a class="video-link" href="${task.videoUrl}" target="_blank" rel="noopener">▶ Watch Tutorial Video</a>`;
+  }
+
+  if (!isCompleted) {
+    // Upload area
+    if (task.requiresUpload) {
+      bodyHtml += `
+        <div class="upload-area" id="upload-${task.id}" onclick="document.getElementById('file-${task.id}').click()">
+          <input type="file" id="file-${task.id}" accept="image/*,.pdf,.doc,.docx" onchange="previewFile('${task.id}', this)" />
+          <div class="upload-icon">📎</div>
+          <div class="upload-text"><strong>Click to upload proof</strong> or drag & drop</div>
+          <div class="upload-text">${escHtml(task.uploadLabel || 'Upload verification file')}</div>
+          <div class="upload-preview" id="preview-${task.id}"></div>
+        </div>
+      `;
+    }
+
+    // Credentials fields
+    if (task.credentialsFields) {
+      bodyHtml += `<div class="credentials-grid">`;
+      task.credentialsFields.forEach(field => {
+        const label = field.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+        const isPass = field.toLowerCase().includes('password');
+        bodyHtml += `
+          <div>
+            <div class="cred-label">${escHtml(label)}</div>
+            <input class="form-input" type="${isPass ? 'password' : 'text'}" id="cred-${task.id}-${field}" placeholder="${escHtml(label)}" />
+          </div>
+        `;
+      });
+      bodyHtml += `</div>`;
+    }
+
+    bodyHtml += `<button class="complete-btn" onclick="completeTask('${task.id}')" id="btn-${task.id}">✓ Mark as Complete</button>`;
+  } else {
+    // Show proof if available
+    if (task.uploadPath) {
+      bodyHtml += `<a class="proof-link" href="${task.uploadPath}" target="_blank">📎 View Uploaded Proof</a><br>`;
+    }
+    bodyHtml += `<span style="font-size:13px;color:var(--pg-light-green);font-weight:600;">✓ Completed on ${formatDateTime(task.completedAt)}</span>`;
+  }
+
+  return `
+    <div class="task-item${isCompleted ? ' completed' : ''}" id="task-${task.id}">
+      <div class="task-item-header" onclick="toggleTask('${task.id}')">
+        <div class="task-check"><span class="check-icon">✓</span></div>
+        <div class="task-title">${escHtml(task.title)}</div>
+        ${isCompleted ? `<span class="task-completed-date">✓ Done</span>` : ''}
+        <span class="task-expand-btn">▾</span>
+      </div>
+      <div class="task-body">${bodyHtml}</div>
+    </div>
+  `;
+}
+
+function toggleTask(id) {
+  const el = document.getElementById('task-' + id);
+  el.classList.toggle('open');
+}
+
+function toggleSection(id) {
+  document.getElementById('section-' + id).classList.toggle('collapsed');
+}
+
+function previewFile(taskId, input) {
+  const file = input.files[0];
+  if (file) document.getElementById('preview-' + taskId).textContent = '📄 ' + file.name;
+}
+
+async function completeTask(taskId) {
+  const task = tasksData.find(t => t.id === taskId);
+  const btn = document.getElementById('btn-' + taskId);
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const formData = new FormData();
+
+  // Grab file if required
+  if (task.requiresUpload) {
+    const fileInput = document.getElementById('file-' + taskId);
+    if (fileInput && fileInput.files[0]) formData.append('proof', fileInput.files[0]);
+  }
+
+  // Grab credentials if needed
+  if (task.credentialsFields) {
+    const creds = {};
+    let missing = false;
+    task.credentialsFields.forEach(field => {
+      const val = document.getElementById('cred-' + taskId + '-' + field)?.value?.trim();
+      if (!val) missing = true;
+      creds[field] = val;
+    });
+    if (missing) { alert('Please fill in all credential fields.'); btn.disabled=false; btn.textContent='✓ Mark as Complete'; return; }
+    formData.append('credentials', JSON.stringify(creds));
+  }
+
+  try {
+    const res = await fetch('/api/tasks/' + taskId + '/complete', {
+      method: 'POST', body: formData, credentials: 'include'
+    });
+    const data = await res.json();
+    if (!res.ok) { alert(data.error || 'Failed to complete task.'); btn.disabled=false; btn.textContent='✓ Mark as Complete'; return; }
+    // Update local data and re-render
+    const t = tasksData.find(t => t.id === taskId);
+    t.completed = true;
+    t.completedAt = data.completion.completedAt;
+    t.uploadPath = data.completion.uploadPath;
+    render();
+  } catch { alert('Network error. Please try again.'); btn.disabled=false; btn.textContent='✓ Mark as Complete'; }
+}
+
+async function logout() {
+  await fetch('/api/auth/logout', {method:'POST', credentials:'include'});
+  window.location.href = '/';
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function formatDate(d) { if(!d) return ''; try { return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch { return d; } }
+function formatDateTime(d) { if(!d) return ''; try { return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}); } catch { return d; } }
+
+init();
+</script>
+</body>
+</html>
