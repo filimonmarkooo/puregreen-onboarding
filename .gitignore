@@ -1,0 +1,22 @@
+# Secrets. Never commit these.
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Uploaded proof files
+public/uploads/*
+!public/uploads/.gitkeep
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*

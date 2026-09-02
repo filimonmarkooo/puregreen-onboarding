@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pure Green | Admin Dashboard</title>
+<link rel="stylesheet" href="/css/brand.css">
+<style>
+  body { background: var(--pg-offwhite); }
+  .main { max-width: 1060px; margin: 0 auto; padding: 0 32px 90px; }
+  @media(max-width:640px){ .main { padding: 0 18px 70px; } }
+
+  .admin-badge { font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:#fff; background:var(--pg-dark-green); padding:4px 10px; border-radius:99px; }
+
+  /* Masthead */
+  .masthead { background:#fff; margin:0 -32px; padding:38px 32px 26px; border-bottom:0.5px solid var(--rule); }
+  @media(max-width:640px){ .masthead { margin:0 -18px; padding:28px 18px 20px; } }
+  .masthead h1 { font-family:var(--font-display); font-weight:700; font-size:clamp(34px,5.5vw,46px); line-height:.9; letter-spacing:.5px; text-transform:uppercase; color:var(--pg-dark-green); margin:10px 0 26px; }
+  .masthead h1 .lt { color:var(--pg-light-green); }
+
+  .stats-row { display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--rule-strong); padding-top:20px; }
+  @media(max-width:640px){ .stats-row { grid-template-columns:repeat(2,1fr); gap:18px 0; } }
+  .stat-card { background:none; border-right:1px solid var(--rule); padding:0 20px 0 0; box-shadow:none; border-radius:0; }
+  .stat-card:last-child { border-right:none; }
+  .stat-card + .stat-card { padding-left:22px; }
+  .stat-val { font-family:var(--font-display); font-weight:700; font-size:44px; line-height:1; color:var(--pg-dark-green); }
+  .stat-label { font-family:var(--font-mono); font-size:10px; letter-spacing:1.4px; text-transform:uppercase; color:var(--ink-4); margin-top:4px; }
+
+  /* Tabs */
+  .tab-bar { display:flex; gap:0; background:#fff; margin:0 -32px; padding:0 32px; border-bottom:1px solid var(--rule-strong); overflow-x:auto; }
+  @media(max-width:640px){ .tab-bar { margin:0 -18px; padding:0 18px; } }
+  .tab-btn { font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:1.6px; text-transform:uppercase; color:var(--ink-5); background:none; border:none; border-bottom:2px solid transparent; padding:15px 0 13px; margin-right:26px; margin-bottom:-1px; cursor:pointer; white-space:nowrap; transition:color .18s; }
+  .tab-btn.active { color:var(--pg-dark-green); border-bottom-color:var(--pg-dark-green); }
+  .tab-section { display:none; }
+  .tab-section.active { display:block; }
+
+  .section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin:36px 0 0; padding-bottom:2px; }
+  @media(max-width:600px){ .section-head { flex-direction:column; align-items:flex-start; gap:14px; } }
+  .section-heading { font-family:var(--font-display); font-weight:700; font-size:28px; line-height:1; letter-spacing:.5px; text-transform:uppercase; color:var(--pg-dark-green); margin:0; }
+  .section-intro { font-size:14px; line-height:1.65; color:var(--ink-3); margin:12px 0 26px; max-width:640px; }
+  .section-head + .franchisee-grid, .section-head + #task-manager-list { margin-top:22px; }
+
+  /* Status legend */
+  .status-legend { display:flex; gap:24px; flex-wrap:wrap; margin:0 0 18px; padding-bottom:16px; border-bottom:1px solid var(--rule-strong); }
+  .sl-item { display:flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--ink-3); }
+  .sl-swatch { width:3px; height:13px; }
+
+  /* Location rows */
+  .franchisee-grid { display:block; }
+  .franchisee-card { background:#fff; border-bottom:1px solid var(--rule); border-left:4px solid transparent; margin-left:-4px; border-radius:0; box-shadow:none; overflow:hidden; }
+  .franchisee-card.status-green  { border-left-color:var(--pg-dark-green); }
+  .franchisee-card.status-yellow { border-left-color:var(--pg-orange); }
+  .franchisee-card.status-red    { border-left-color:var(--st-red); }
+  .franchisee-card:hover { background:#FDFDFC; }
+
+  .fc-header { display:flex; align-items:center; gap:20px; padding:22px; cursor:pointer; }
+  @media(max-width:640px){ .fc-header { flex-wrap:wrap; gap:12px; } }
+  .fc-avatar { display:none; }
+  .fc-info { flex:1; min-width:180px; }
+  .fc-name { font-family:var(--font-display); font-weight:700; font-size:25px; letter-spacing:.4px; text-transform:uppercase; color:var(--pg-dark-green); line-height:1; }
+  .fc-meta { font-size:13.5px; color:var(--ink-3); margin-top:5px; }
+  .fc-progress-col { display:flex; align-items:baseline; gap:9px; text-align:right; min-width:96px; justify-content:flex-end; }
+  .fc-pct { font-family:var(--font-display); font-weight:700; font-size:34px; line-height:1; color:var(--pg-dark-green); }
+  .fc-bar-wrap { display:none; }
+  .fc-expand { font-size:11px; color:var(--ink-5); transition:transform .2s; }
+  .franchisee-card.open .fc-expand { transform:rotate(180deg); }
+  .days-out { font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; color:var(--ink-3); white-space:nowrap; }
+  .days-out.urgent { color:var(--st-red); }
+  .status-pill { font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; margin-left:11px; vertical-align:middle; }
+  .status-pill.green { color:var(--pg-light-green-text); }
+  .status-pill.yellow { color:var(--pg-orange-text); }
+  .status-pill.red { color:var(--st-red); }
+
+  .fc-detail { display:none; border-top:1px solid var(--rule); background:#FCFDFC; }
+  .franchisee-card.open .fc-detail { display:block; }
+  .fc-detail-inner { padding:26px 22px; }
+  .fc-info-row { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:26px; }
+  @media(max-width:640px){ .fc-info-row { grid-template-columns:1fr; gap:14px; } }
+  .fc-info-item label { font-family:var(--font-mono); font-size:10px; letter-spacing:1.4px; text-transform:uppercase; color:var(--ink-3); display:block; margin-bottom:5px; }
+  .fc-info-item span { font-size:14px; color:var(--pg-charcoal); }
+
+  .pt-platform-header { font-family:var(--font-display); font-weight:700; font-size:19px; letter-spacing:.4px; text-transform:uppercase; color:var(--pg-dark-green); margin:22px 0 8px; display:flex; align-items:baseline; gap:11px; padding-bottom:8px; border-bottom:1px solid var(--rule-strong); }
+  .pt-item { display:flex; align-items:center; gap:13px; padding:12px 2px; font-size:14px; border-bottom:0.5px solid var(--rule); background:none; border-radius:0; margin:0; }
+  .pt-check { width:16px; height:16px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; }
+  .pt-check.done { background:var(--pg-light-green); color:#fff; }
+  .pt-check.pending { background:none; border:2px solid #D6DAD8; }
+  .pt-title { flex:1; color:var(--pg-charcoal); }
+  .pt-item.done .pt-title { color:var(--ink-4); text-decoration:line-through; }
+  .pt-date { font-family:var(--font-mono); font-size:10px; letter-spacing:1px; color:var(--ink-4); white-space:nowrap; }
+  .pt-proof { font-family:var(--font-mono); font-size:10px; letter-spacing:1.1px; text-transform:uppercase; color:var(--pg-dark-green); text-decoration:none; }
+  .pt-proof:hover { text-decoration:underline; }
+
+  /* Credentials */
+  .cred-box { background:#F7F4FB; border-left:3px solid #A98FD0; padding:12px 15px; margin:2px 0 8px 29px; }
+  .cred-box-label { font-family:var(--font-mono); font-size:10px; letter-spacing:1.4px; text-transform:uppercase; color:#6E4B9E; margin-bottom:8px; }
+  .cred-row { display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:5px; }
+  .cred-key { font-family:var(--font-mono); font-size:11px; letter-spacing:.6px; color:#6E4B9E; min-width:120px; }
+  .cred-val { font-family:var(--font-mono); font-size:12px; color:#3A2050; background:#fff; padding:4px 9px; border:1px solid #E5DCF2; flex:1; word-break:break-all; }
+  .cred-copy { background:none; border:1px solid #DDCFF0; color:#6E4B9E; font-family:var(--font-mono); font-size:10px; letter-spacing:.9px; padding:5px 10px; cursor:pointer; }
+  .cred-copy:hover { background:#EFE7F8; }
+
+  /* Internal admin tasks */
+  .internal-tasks-section { margin-top:28px; border-top:1px solid var(--rule-strong); padding-top:22px; }
+  .internal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+  .internal-title { font-family:var(--font-display); font-weight:700; font-size:19px; letter-spacing:.4px; text-transform:uppercase; color:var(--st-red); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .internal-badge { font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--st-red); border:1px solid #EFC9C4; padding:3px 8px; }
+  .internal-platform-group { margin-bottom:14px; }
+  .internal-platform-label { font-family:var(--font-mono); font-size:10px; letter-spacing:1.4px; text-transform:uppercase; color:var(--ink-3); margin-bottom:7px; }
+  .internal-task-row { display:flex; align-items:center; gap:12px; padding:10px 13px; background:#fff; border-left:2px solid #EFC9C4; margin-bottom:3px; }
+  .internal-task-row.done { border-left-color:var(--pg-light-green); }
+  .internal-check { width:17px; height:17px; border-radius:50%; border:2px solid #EFC9C4; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:#fff; font-size:9px; font-weight:700; color:#fff; transition:all .2s; }
+  .internal-task-row.done .internal-check { background:var(--pg-light-green); border-color:var(--pg-light-green); }
+  .internal-task-title { flex:1; font-size:14px; color:var(--pg-charcoal); }
+  .internal-task-row.done .internal-task-title { text-decoration:line-through; color:var(--ink-4); }
+  .internal-del { color:var(--ink-5); font-size:13px; cursor:pointer; border:none; background:none; padding:0 4px; }
+  .internal-del:hover { color:var(--st-red); }
+  .internal-add-row { display:flex; gap:10px; margin-top:12px; align-items:flex-end; }
+  @media(max-width:640px){ .internal-add-row { flex-wrap:wrap; } }
+
+  /* Task manager */
+  .tm-platform-block { margin-bottom:30px; }
+  .tm-platform-header { display:flex; align-items:baseline; justify-content:space-between; padding-bottom:10px; border-bottom:1px solid var(--rule-strong); }
+  .tm-platform-name { font-family:var(--font-display); font-weight:700; font-size:23px; letter-spacing:.4px; text-transform:uppercase; color:var(--pg-dark-green); }
+  .tm-task-list { background:none; border:none; border-radius:0; }
+  .tm-task-row { display:flex; align-items:center; gap:14px; padding:14px 2px; border-bottom:0.5px solid var(--rule); background:none; }
+  .tm-task-row:hover { background:#fff; }
+  .tm-task-num { font-family:var(--font-mono); font-size:11px; color:var(--ink-4); width:20px; flex-shrink:0; }
+  .tm-task-info { flex:1; }
+  .tm-task-title { font-weight:700; font-size:15px; color:var(--pg-charcoal); }
+  .tm-task-desc { font-size:13px; color:var(--ink-3); margin-top:2px; line-height:1.5; }
+  .tm-task-meta { display:flex; gap:12px; margin-top:5px; flex-wrap:wrap; }
+  .tm-pill { font-family:var(--font-mono); font-size:10px; letter-spacing:1.1px; text-transform:uppercase; padding:0; border-radius:0; background:none !important; }
+  .tm-pill-upload { color:#3E7CB1 !important; }
+  .tm-pill-custom { color:var(--pg-orange-text) !important; }
+  .tm-pill-video { color:var(--pg-light-green-text) !important; }
+  .tm-actions { display:flex; gap:14px; flex-shrink:0; }
+  .btn-edit, .btn-del { background:none; border:none; border-radius:0; padding:0; font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; cursor:pointer; }
+  .btn-edit { color:var(--pg-dark-green); }
+  .btn-edit:hover { text-decoration:underline; }
+  .btn-del { color:var(--st-red); }
+  .btn-del:hover { text-decoration:underline; }
+  .tm-add-row { padding:14px 2px; border-top:1px dashed var(--rule-strong); }
+  .tm-add-btn { display:flex; align-items:center; gap:8px; background:none; border:none; color:var(--pg-dark-green); font-family:var(--font-mono); font-size:11px; letter-spacing:1.3px; text-transform:uppercase; cursor:pointer; padding:0; }
+  .tm-add-btn:hover { color:var(--pg-light-green); }
+
+  /* Modals */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(20,28,24,.55); z-index:1000; align-items:center; justify-content:center; padding:24px; }
+  .modal-overlay.show { display:flex; }
+  .modal {
+    background:#fff; border-radius:0; max-width:560px; width:100%;
+    max-height:88vh; display:flex; flex-direction:column; position:relative;
+  }
+  /* Header stays put */
+  .modal-title {
+    font-family:var(--font-display); font-weight:700; font-size:28px; line-height:1;
+    letter-spacing:.5px; text-transform:uppercase; color:var(--pg-dark-green);
+    margin:0; padding:32px 60px 20px 36px; flex-shrink:0;
+    border-bottom:1px solid var(--rule);
+  }
+  /* Everything between header and footer scrolls */
+  .modal-body { padding:26px 36px 8px; overflow-y:auto; flex:1; min-height:0; -webkit-overflow-scrolling:touch; }
+  /* Footer always visible */
+  .modal-footer {
+    display:flex; gap:10px; justify-content:flex-end; flex-shrink:0;
+    padding:18px 36px 26px; border-top:1px solid var(--rule); background:#fff;
+    flex-wrap:wrap;
+  }
+  /* Always reachable close control */
+  .modal-close {
+    position:absolute; top:22px; right:22px; width:34px; height:34px;
+    border:1px solid var(--rule-strong); background:#fff; color:var(--ink-3);
+    font-size:17px; line-height:1; cursor:pointer; z-index:2;
+    display:flex; align-items:center; justify-content:center; transition:all .15s;
+  }
+  .modal-close:hover { border-color:var(--pg-dark-green); color:var(--pg-dark-green); background:#F2F8F5; }
+  @media(max-width:600px){
+    .modal-title { padding:26px 56px 16px 22px; font-size:23px; }
+    .modal-body { padding:20px 22px 8px; }
+    .modal-footer { padding:16px 22px 22px; }
+  }
+  .checkbox-row { display:flex; align-items:center; gap:11px; margin-bottom:20px; }
+  .checkbox-row input[type=checkbox] { width:16px; height:16px; accent-color:var(--pg-dark-green); }
+  .checkbox-row label { font-size:14px; color:var(--pg-charcoal); cursor:pointer; }
+
+  /* Calendar */
+  .cal-header { display:flex; align-items:center; gap:12px; margin:36px 0 16px; flex-wrap:wrap; }
+  .cal-month-title { font-family:var(--font-display); font-weight:700; font-size:30px; letter-spacing:.5px; text-transform:uppercase; color:var(--pg-dark-green); min-width:230px; }
+  .cal-nav-btn { width:32px; height:32px; border:1px solid var(--rule-strong); background:#fff; color:var(--pg-dark-green); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+  .cal-nav-btn:hover { border-color:var(--pg-dark-green); background:var(--pg-dark-green); color:#fff; }
+  .cal-legend { display:flex; gap:22px; margin-bottom:14px; flex-wrap:wrap; }
+  .cal-legend-item { display:flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--ink-3); }
+  .cal-dot { width:3px; height:12px; border-radius:0; display:inline-block; }
+  .dot-active { background:var(--pg-dark-green); }
+  .dot-upcoming { background:var(--pg-orange); }
+  .cal-grid-header { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; margin-bottom:1px; }
+  .cal-grid-header div { text-align:center; font-family:var(--font-mono); font-size:10px; letter-spacing:1.4px; text-transform:uppercase; color:var(--ink-3); padding:8px 0; }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); }
+  .cal-cell { background:#fff; min-height:86px; padding:7px; }
+  .cal-cell.empty { background:#FBFCFB; }
+  .cal-cell.today { background:#F7FBF3; }
+  .cal-cell.has-events { cursor:pointer; }
+  .cal-cell.has-events:hover { background:#F7FBF9; }
+  .cal-day-num { font-family:var(--font-mono); font-size:11px; color:var(--ink-4); margin-bottom:5px; }
+  .cal-cell.today .cal-day-num { color:var(--pg-light-green-text); }
+  .cal-event { font-size:10px; padding:4px 6px; margin-bottom:2px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border-radius:0; }
+  .cal-more { font-family:var(--font-mono); font-size:10px; color:var(--ink-4); padding-left:5px; }
+  @media(max-width:768px){ .cal-cell { min-height:62px; padding:4px; } .cal-event { font-size:7px; } .cal-month-title { font-size:20px; min-width:150px; } }
+
+  .day-popup-list { display:flex; flex-direction:column; gap:14px; }
+  .day-event-card { background:#FCFDFC; border-left:4px solid var(--pg-dark-green); padding:18px; }
+  .day-event-card.upcoming { border-left-color:var(--pg-orange); }
+  .de-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+  .de-name { font-family:var(--font-display); font-weight:700; font-size:22px; letter-spacing:.4px; text-transform:uppercase; color:var(--pg-dark-green); line-height:1; }
+  .de-meta { font-size:13.5px; color:var(--ink-3); margin-top:4px; }
+  .de-type-badge { font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; padding:3px 8px; text-transform:uppercase; white-space:nowrap; }
+  .de-stats { display:flex; gap:26px; margin-bottom:14px; }
+  .de-stat-val { font-family:var(--font-display); font-weight:700; font-size:26px; line-height:1; }
+  .de-stat-label { font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--ink-3); margin-top:2px; }
+  .de-bar-wrap { background:var(--rule); height:3px; margin-bottom:14px; }
+  .de-bar { height:100%; }
+
+  /* Upcoming */
+  .up-badge, .up-linked { font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; padding:0; border:none; background:none; }
+  .up-badge { color:var(--pg-orange-text); }
+  .up-linked { color:var(--pg-light-green-text); }
+  .invite-sent { font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--pg-light-green-text); background:none; border:none; padding:0; margin-left:10px; }
+  .invite-not-sent { font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--ink-4); background:none; border:none; padding:0; margin-left:10px; }
+  .invite-banner { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 18px; margin-bottom:20px; flex-wrap:wrap; border-radius:0; }
+  .invite-banner.sent { background:#F4FAF6; border-left:4px solid var(--pg-light-green); }
+  .invite-banner.unsent { background:#FFFBF0; border-left:4px solid var(--pg-orange); }
+  .ib-text { font-size:13px; line-height:1.6; color:var(--ink-3); }
+  .ib-text strong { display:block; font-family:var(--font-mono); font-size:11px; letter-spacing:1.3px; text-transform:uppercase; margin-bottom:4px; }
+  .up-actions { display:flex; gap:16px; margin-top:22px; padding-top:18px; border-top:1px solid var(--rule-strong); flex-wrap:wrap; }
+  .up-notes { background:var(--pg-yellow); padding:14px 16px; font-size:13.5px; color:#6B5A18; margin-bottom:20px; line-height:1.6; border-left:3px solid var(--pg-orange); }
+
+  .preview-frame { border:1px solid var(--rule-strong); height:260px; width:100%; background:#fff; display:block; }
+  .preview-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .copy-note { background:#F2F7FB; border-left:3px solid #8FB8D6; padding:14px 16px; font-size:13.5px; color:#2F5A7A; line-height:1.6; margin-bottom:18px; }
+  .video-edit-row { display:flex; gap:10px; align-items:flex-end; margin-top:8px; }
+  .video-edit-input { flex:1; }
+  .video-status { font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; color:var(--pg-light-green-text); margin-top:6px; display:none; }
+  .new-platform-block { background:#fff; border:1px dashed var(--rule-strong); padding:24px; text-align:center; margin-bottom:20px; }
+
+  .loading { text-align:center; padding:80px; color:var(--ink-3); font-family:var(--font-mono); font-size:11px; letter-spacing:1.8px; }
+  .spinner { display:block; width:26px; height:26px; border:2px solid var(--rule); border-top-color:var(--pg-dark-green); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 16px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div style="display:flex;align-items:center;gap:11px;">
+    <a class="pg-logo" href="/admin.html">
+      <img src="/img/logo-mark.svg" alt="Pure Green">
+      <span class="pg-logo-text">pure<span>green</span></span>
+    </a>
+    <span class="admin-badge">Corporate</span>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <button class="btn btn-outline btn-sm" onclick="loadData()">Refresh</button>
+    <button class="btn btn-outline btn-sm" onclick="logout()">Sign Out</button>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="loading" id="loading"><span class="spinner"></span>LOADING DASHBOARD</div>
+  <div id="content" style="display:none">
+
+    <div class="masthead">
+      <div class="eyebrow">Network Overview</div>
+      <h1>All <span class="lt">Locations</span></h1>
+      <div class="stats-row" id="stats-row"></div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('franchisees', this)">Active</button>
+      <button class="tab-btn" onclick="switchTab('upcoming', this)">Upcoming</button>
+      <button class="tab-btn" onclick="switchTab('calendar', this)">Calendar</button>
+      <button class="tab-btn" onclick="switchTab('tasks', this)">Tasks</button>
+      <button class="tab-btn" onclick="switchTab('videos', this)">Links</button>
+    </div>
+
+    <!-- FRANCHISEES TAB -->
+    <div class="tab-section active" id="tab-franchisees">
+      <div class="section-head"><div class="section-heading">Active Locations</div></div>
+      <p class="section-intro">Every registered location and how far along their onboarding is. Sorted with the most urgent first.</p>
+      <div class="franchisee-grid" id="franchisee-grid"></div>
+    </div>
+
+    <!-- UPCOMING LOCATIONS TAB -->
+    <div class="tab-section" id="tab-upcoming">
+      <div class="section-head">
+        <div class="section-heading">Upcoming Locations</div>
+        <button class="btn btn-secondary btn-sm" onclick="openUpcomingModal()">Add Location</button>
+      </div>
+      <p class="section-intro">Locations in the pipeline that have not registered yet. Add their details and start tracking prep tasks before they sign up.</p>
+      <div class="franchisee-grid" id="upcoming-grid"></div>
+    </div>
+
+    <!-- CALENDAR TAB -->
+    <div class="tab-section" id="tab-calendar">
+      <div class="cal-header">
+        <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+        <div class="cal-month-title" id="cal-month-title"></div>
+        <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+        <button class="btn btn-outline btn-sm" style="margin-left:16px" onclick="goToToday()">Today</button>
+      </div>
+      <div class="cal-legend">
+        <span class="cal-legend-item"><span class="cal-dot dot-active"></span> Active (registered)</span>
+        <span class="cal-legend-item"><span class="cal-dot dot-upcoming"></span> Upcoming (pipeline)</span>
+      </div>
+      <div class="cal-grid-header">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+
+    <!-- TASK MANAGER TAB -->
+    <div class="tab-section" id="tab-tasks">
+      <div class="section-head">
+        <div class="section-heading">Manage Tasks</div>
+        <button class="btn btn-secondary btn-sm" onclick="openAddPlatformModal()">Add Platform</button>
+      </div>
+      <p class="section-intro">The master list. Add, edit, or delete tasks on any platform and they appear immediately on every franchisee dashboard.</p>
+      <div id="task-manager-list"></div>
+    </div>
+
+    <!-- VIDEOS TAB -->
+    <div class="tab-section" id="tab-videos">
+      <div class="section-head"><div class="section-heading">Task Links</div></div>
+      <p class="section-intro">Paste any link next to a task, whether a tutorial video, a signup form, or a document. Franchisees see a clickable button on that task immediately.</p>
+      <div id="video-task-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD / EDIT TASK MODAL -->
+<div class="modal-overlay" id="task-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()" aria-label="Close">&#10005;</button>
+    <div class="modal-title" id="modal-title">Add New Task</div>
+    <div class="modal-body">
+    <div class="alert alert-error" id="modal-error"></div>
+    <div class="form-group">
+      <label class="form-label">Platform</label>
+      <select class="form-input" id="modal-platform" id="modal-platform">
+        <option value="Square">Square</option>
+        <option value="Uber Eats">Uber Eats</option>
+        <option value="DoorDash">DoorDash</option>
+        <option value="Grubhub">Grubhub</option>
+        <option value="Stream">Stream</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Task Title</label>
+      <input class="form-input" type="text" id="modal-task-title" placeholder="e.g. Set up loyalty program" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description / Instructions</label>
+      <textarea class="form-input" id="modal-task-desc" rows="3" style="resize:vertical" placeholder="Step-by-step instructions for the franchisee…"></textarea>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="modal-requires-upload" />
+      <label for="modal-requires-upload">Require franchisee to upload proof (screenshot, document, etc.)</label>
+    </div>
+    <div class="form-group" id="modal-upload-label-group" style="display:none">
+      <label class="form-label">Upload Instructions</label>
+      <input class="form-input" type="text" id="modal-upload-label" placeholder="e.g. Screenshot of completed setup" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Link URL</label>
+      <input class="form-input" type="url" id="modal-video-url" placeholder="https://... video, form, doc, anything" />
+      <div style="font-size:12.5px;color:var(--ink-3);margin-top:6px;">Shows a clickable button on this task for franchisees.</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Link Button Text</label>
+      <input class="form-input" type="text" id="modal-link-label" placeholder="Open Link" />
+      <div style="font-size:12.5px;color:var(--ink-3);margin-top:6px;">What the button says. e.g. "Watch Tutorial", "Submit Documents Here", "Download Form". Defaults to "Open Link".</div>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="modal-requires-creds" />
+      <label for="modal-requires-creds">Ask franchisee to submit login credentials for this task</label>
+    </div>
+    <div class="form-group" id="modal-creds-group" style="display:none">
+      <label class="form-label">Credential Field Names</label>
+      <input class="form-input" type="text" id="modal-creds-fields" placeholder="squareEmail, squarePassword" />
+      <div style="font-size:12.5px;color:var(--ink-3);margin-top:6px;">Comma separated. Any field containing "password" is masked as they type. Example: toastEmail, toastPassword</div>
+    </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="saveTask()">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PLATFORM MODAL -->
+<div class="modal-overlay" id="platform-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closePlatformModal()" aria-label="Close">&#10005;</button>
+    <div class="modal-title">Add New Platform</div>
+    <div class="modal-body">
+    <div class="alert alert-error" id="platform-error"></div>
+    <div class="form-group">
+      <label class="form-label">Platform Name</label>
+      <input class="form-input" type="text" id="new-platform-name" placeholder="e.g. Toast POS, Yelp, etc." />
+    </div>
+    <p style="font-size:13.5px;color:var(--ink-3);margin-bottom:16px;">After adding the platform, you can add tasks to it from the task manager.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closePlatformModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addPlatform()">Add Platform</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allFranchisees = [];
+let allTasks = [];
+let customPlatforms = [];
+let editingTaskId = null;
+
+const BASE_PLATFORMS = ['Square', 'Uber Eats', 'DoorDash', 'Grubhub', 'Stream'];
+const PLATFORM_COLORS = { 'Square':'badge-square','Uber Eats':'badge-ubereats','DoorDash':'badge-doordash','Grubhub':'badge-grubhub','Stream':'badge-stream' };
+
+function getPlatformList() {
+  const fromTasks = [...new Set(allTasks.map(t => t.platform))];
+  const all = [...new Set([...BASE_PLATFORMS, ...fromTasks, ...customPlatforms])];
+  return all;
+}
+
+async function init() {
+  const me = await fetch('/api/auth/me', {credentials:'include'}).then(r=>r.json());
+  if (!me.user) return window.location.href = '/';
+  if (me.user.role !== 'admin') return window.location.href = '/dashboard.html';
+  await loadData();
+}
+
+async function loadData() {
+  document.getElementById('loading').style.display = '';
+  document.getElementById('content').style.display = 'none';
+  try {
+    [allFranchisees, allTasks, allUpcoming, calendarEvents] = await Promise.all([
+      fetch('/api/admin/franchisees', {credentials:'include'}).then(r=>r.json()),
+      fetch('/api/tasks/admin/all', {credentials:'include'}).then(r=>r.json()),
+      fetch('/api/admin/upcoming', {credentials:'include'}).then(r=>r.json()),
+      fetch('/api/admin/calendar', {credentials:'include'}).then(r=>r.json())
+    ]);
+    renderStats();
+    renderFranchisees();
+    renderUpcoming();
+    renderCalendar();
+    renderTaskManager();
+    renderVideoManager();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = '';
+  } catch(e) {
+    document.getElementById('loading').innerHTML = '<p style="color:red">Failed to load. Please refresh.</p>';
+  }
+}
+
+function renderStats() {
+  const total = allFranchisees.length;
+  const completed = allFranchisees.filter(f => f.pct === 100).length;
+  const inProgress = allFranchisees.filter(f => f.pct > 0 && f.pct < 100).length;
+  const notStarted = allFranchisees.filter(f => f.pct === 0).length;
+  const upcomingCount = (typeof allUpcoming !== 'undefined' && allUpcoming) ? allUpcoming.length : 0;
+  const atRisk = allFranchisees.filter(f => getStatus(f.plannedOpenDate, f.pct).key === 'red').length;
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-label">Active</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--pg-charcoal)">${upcomingCount}</div><div class="stat-label">Pipeline</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--pg-light-green-text)">${completed}</div><div class="stat-label">Complete</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:${atRisk ? 'var(--st-red)' : 'var(--ink-5)'}">${atRisk}</div><div class="stat-label">At Risk</div></div>
+  `;
+}
+
+// Status colour logic
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const target = new Date(String(dateStr).split('T')[0] + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Math.ceil((target - today) / 86400000);
+}
+
+function getStatus(dateStr, pct) {
+  const days = daysUntil(dateStr);
+  if (days === null) return { key:'green', label:'On Track', days:null };
+  if (days < 0)  return pct >= 100 ? { key:'green', label:'Complete', days } : { key:'red', label:'Overdue', days };
+  if (days <= 14 && pct < 100) return { key:'red',    label:'Urgent',   days };
+  if (days <= 30 && pct < 50)  return { key:'yellow', label:'Behind',   days };
+  if (pct >= 100)              return { key:'green',  label:'Complete', days };
+  return { key:'green', label:'On Track', days };
+}
+
+function daysLabel(days) {
+  if (days === null) return 'No open date';
+  if (days < 0) return `${Math.abs(days)}d overdue`;
+  if (days === 0) return 'Opens today';
+  return `${days}d out`;
+}
+
+function renderFranchisees() {
+  const grid = document.getElementById('franchisee-grid');
+  if (!allFranchisees.length) {
+    grid.innerHTML = '<div style="text-align:center;padding:48px;color:var(--ink-3);font-family:var(--font-mono);font-size:11px;letter-spacing:1.4px;">NO LOCATIONS REGISTERED YET</div>';
+    return;
+  }
+
+  const legend = `<div class="status-legend">
+    <span class="sl-item"><span class="sl-swatch" style="background:#046A38"></span> ON TRACK</span>
+    <span class="sl-item"><span class="sl-swatch" style="background:#FF912E"></span> BEHIND &nbsp;UNDER 50% AT 30 DAYS</span>
+    <span class="sl-item"><span class="sl-swatch" style="background:#C0392B"></span> URGENT &nbsp;UNDER 100% AT 2 WEEKS</span>
+  </div>`;
+
+  // Sort most urgent first
+  const order = { red:0, yellow:1, green:2 };
+  const sorted = [...allFranchisees].sort((a,b) => {
+    const sa = getStatus(a.plannedOpenDate, a.pct), sb = getStatus(b.plannedOpenDate, b.pct);
+    if (order[sa.key] !== order[sb.key]) return order[sa.key] - order[sb.key];
+    return (sa.days ?? 9999) - (sb.days ?? 9999);
+  });
+
+  grid.innerHTML = legend + sorted.map(f => {
+    const s = getStatus(f.plannedOpenDate, f.pct);
+    const col = s.key==='red' ? 'var(--st-red)' : s.key==='yellow' ? 'var(--pg-orange-text)' : 'var(--pg-dark-green)';
+    return `
+    <div class="franchisee-card status-${s.key}" id="fc-${f.id}">
+      <div class="fc-header" onclick="toggleFranchisee('${f.id}')">
+        <div class="fc-info">
+          <div class="fc-name">${escHtml(f.storeName)}<span class="status-pill ${s.key}">${s.label}</span></div>
+          <div class="fc-meta">${escHtml(f.ownerName)} &nbsp;&middot;&nbsp; ${escHtml(f.storeAddress)}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="days-out ${s.key==='red'?'urgent':''}">${daysLabel(s.days)}</div>
+          <div class="days-out" style="color:var(--ink-4);margin-top:3px">${formatDate(f.plannedOpenDate)}</div>
+        </div>
+        <div class="fc-progress-col">
+          <span class="fc-pct" style="color:${col}">${f.pct}%</span>
+          <span class="days-out" style="color:var(--ink-4)">${f.completedCount}/${f.totalCount}</span>
+        </div>
+        <span class="fc-expand">&#9660;</span>
+      </div>
+      <div class="fc-detail"><div class="fc-detail-inner" id="fc-detail-${f.id}"><div style="text-align:center;padding:20px;color:var(--ink-3);font-family:var(--font-mono);font-size:11px;letter-spacing:1.3px;">LOADING</div></div></div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteFranchisee(id, name) {
+  if (!confirm(`Delete "${name}"?\n\nThis permanently removes their account, all task progress, uploaded proof records, and internal admin notes. This cannot be undone.`)) return;
+  if (!confirm(`Last check. Really delete "${name}"?`)) return;
+  const res = await fetch('/api/admin/franchisees/' + id, { method:'DELETE', credentials:'include' });
+  if (res.ok) { await loadData(); }
+  else { const d = await res.json(); alert(d.error || 'Failed to delete.'); }
+}
+
+async function toggleFranchisee(id) {
+  const card = document.getElementById('fc-' + id);
+  const isOpen = card.classList.contains('open');
+  card.classList.toggle('open', !isOpen);
+  if (!isOpen) await loadFranchiseeDetail(id);
+}
+
+async function loadFranchiseeDetail(id) {
+  const f = allFranchisees.find(x => x.id === id);
+  const [tasks, adminTasks] = await Promise.all([
+    fetch('/api/tasks/user/' + id, {credentials:'include'}).then(r=>r.json()),
+    fetch('/api/admin/franchisees/' + id + '/admin-tasks', {credentials:'include'}).then(r=>r.json())
+  ]);
+  const detail = document.getElementById('fc-detail-' + id);
+  const platforms = getPlatformList();
+  const byPlatform = {};
+  platforms.forEach(p => byPlatform[p] = []);
+  tasks.forEach(t => { if (!byPlatform[t.platform]) byPlatform[t.platform] = []; byPlatform[t.platform].push(t); });
+
+  let html = `<div class="fc-info-row">
+    <div class="fc-info-item"><label>Email</label><span>${escHtml(f.email)}</span></div>
+    <div class="fc-info-item"><label>Planned Open</label><span>${formatDate(f.plannedOpenDate)}</span></div>
+    <div class="fc-info-item"><label>Registered</label><span>${formatDate(f.createdAt)}</span></div>
+  </div>`;
+
+  platforms.forEach(platform => {
+    const pts = byPlatform[platform];
+    if (!pts || !pts.length) return;
+    const done = pts.filter(t => t.completed).length;
+    html += `<div class="pt-platform-header"><span class="platform-badge">${escHtml(platform)}</span><span style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.1px;color:var(--ink-3)">${done} OF ${pts.length}</span></div>`;
+    pts.forEach(task => {
+      html += `<div class="pt-item${task.completed?' done':''}">
+        <div class="pt-check ${task.completed?'done':'pending'}">${task.completed?'✓':''}</div>
+        <div class="pt-title">${escHtml(task.title)}
+          ${task.requiresUpload && task.completed && !task.uploadPath ? '<span style="font-family:var(--font-mono);font-size:10px;letter-spacing:1px;color:var(--st-red);margin-left:10px;">NO PROOF</span>' : ''}
+        </div>
+        ${task.uploadPath ? `<a class="pt-proof" href="${task.uploadPath}" target="_blank">View Proof</a>` : ''}
+        ${task.completedAt ? `<div class="pt-date">${formatDate(task.completedAt)}</div>` : ''}
+      </div>`;
+      if (task.credentials && Object.keys(task.credentials).length) {
+        html += `<div class="cred-box">
+          <div class="cred-box-label">Submitted Credentials</div>
+          ${Object.entries(task.credentials).map(([k,v]) => `
+            <div class="cred-row">
+              <span class="cred-key">${escHtml(k.replace(/([A-Z])/g,' $1').replace(/^./,s=>s.toUpperCase()))}</span>
+              <span class="cred-val" id="cv-${task.id}-${escHtml(k)}">${escHtml(v)}</span>
+              <button class="cred-copy" onclick="copyCred('cv-${task.id}-${escHtml(k)}', this)">Copy</button>
+            </div>`).join('')}
+        </div>`;
+      }
+    });
+  });
+
+  // Internal admin tasks section
+  const byAdminPlatform = {};
+  adminTasks.forEach(t => { if (!byAdminPlatform[t.platform]) byAdminPlatform[t.platform] = []; byAdminPlatform[t.platform].push(t); });
+  const totalAdmin = adminTasks.length;
+  const doneAdmin = adminTasks.filter(t => t.completed).length;
+
+  html += `<div class="internal-tasks-section">
+    <div class="internal-header">
+      <div class="internal-title">
+        Internal Admin Checklist
+        <span class="internal-badge">ADMIN ONLY. NOT VISIBLE TO FRANCHISEE</span>
+      </div>
+      <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.1px;color:var(--ink-3)">${doneAdmin} OF ${totalAdmin} DONE</span>
+    </div>`;
+
+  const allPlatforms = getPlatformList();
+  allPlatforms.forEach(platform => {
+    const pts = byAdminPlatform[platform] || [];
+    if (pts.length) {
+      html += `<div class="internal-platform-group">
+        <div class="internal-platform-label">${escHtml(platform)}</div>`;
+      pts.forEach(t => {
+        html += `<div class="internal-task-row${t.completed?' done':''}" id="atr-${t.id}">
+          <div class="internal-check" onclick="toggleInternalTask('${t.id}', ${!t.completed}, '${id}')">${t.completed?'✓':''}</div>
+          <div class="internal-task-title">${escHtml(t.title)}</div>
+          <button class="internal-del" onclick="deleteInternalTask('${t.id}', '${id}')">✕</button>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+  });
+
+  // Add new internal task form
+  const platformOptions = allPlatforms.map(p => `<option value="${escHtml(p)}">${escHtml(p)}</option>`).join('');
+  html += `
+    <div class="internal-add-row">
+      <select class="form-input" id="iat-platform-${id}" style="flex:0 0 140px;font-size:13px;padding:9px 12px">${platformOptions}</select>
+      <input class="form-input" type="text" id="iat-title-${id}" placeholder="Add internal task..." style="font-size:13px;padding:9px 12px" onkeydown="if(event.key==='Enter') addInternalTask('${id}')" />
+      <button class="btn btn-sm" style="background:#c0392b;color:white;border:none;cursor:pointer;border-radius:6px;padding:9px 16px;font-weight:700;white-space:nowrap" onclick="addInternalTask('${id}')">+ Add</button>
+    </div>
+  </div>
+
+  <div class="up-actions">
+    <button class="btn-del" onclick="deleteFranchisee('${id}', '${escHtml(f.storeName).replace(/'/g,"\\'")}')">Delete This Location</button>
+  </div>`;
+
+  detail.innerHTML = html;
+}
+
+function copyCred(elId, btn) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 1400);
+  });
+}
+
+async function addInternalTask(franchiseeId) {
+  const platform = document.getElementById('iat-platform-' + franchiseeId).value;
+  const title = document.getElementById('iat-title-' + franchiseeId).value.trim();
+  if (!title) return;
+  const res = await fetch('/api/admin/franchisees/' + franchiseeId + '/admin-tasks', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ platform, title }), credentials: 'include'
+  });
+  if (res.ok) { await loadFranchiseeDetail(franchiseeId); }
+}
+
+async function toggleInternalTask(taskId, completed, franchiseeId) {
+  await fetch('/api/admin/admin-tasks/' + taskId + '/toggle', {
+    method: 'PATCH', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ completed }), credentials: 'include'
+  });
+  await loadFranchiseeDetail(franchiseeId);
+}
+
+async function deleteInternalTask(taskId, franchiseeId) {
+  if (!confirm('Delete this internal task?')) return;
+  await fetch('/api/admin/admin-tasks/' + taskId, { method: 'DELETE', credentials: 'include' });
+  await loadFranchiseeDetail(franchiseeId);
+}
+
+// ── TASK MANAGER ──────────────────────────────────────────
+
+function renderTaskManager() {
+  const platforms = getPlatformList();
+  const byPlatform = {};
+  platforms.forEach(p => byPlatform[p] = []);
+  allTasks.forEach(t => { if (!byPlatform[t.platform]) byPlatform[t.platform] = []; byPlatform[t.platform].push(t); });
+
+  let html = '';
+  platforms.forEach(platform => {
+    const tasks = byPlatform[platform] || [];
+    html += `
+      <div class="tm-platform-block">
+        <div class="tm-platform-header">
+          <span class="tm-platform-name">${escHtml(platform)}</span>
+          <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.3px;color:var(--ink-3)">${tasks.length} TASK${tasks.length!==1?'S':''}</span>
+        </div>
+        <div class="tm-task-list">
+          ${tasks.map((task, i) => `
+            <div class="tm-task-row" id="tmrow-${task.id}">
+              <span class="tm-task-num">${i+1}</span>
+              <div class="tm-task-info">
+                <div class="tm-task-title">${escHtml(task.title)}</div>
+                ${task.description ? `<div class="tm-task-desc">${escHtml(task.description.substring(0,100))}${task.description.length>100?'…':''}</div>` : ''}
+                <div class="tm-task-meta">
+                  ${task.requiresUpload ? '<span class="tm-pill tm-pill-upload">Requires Upload</span>' : ''}
+                  ${task.isCustom ? '<span class="tm-pill tm-pill-custom">Custom</span>' : ''}
+                  ${task.videoUrl ? '<span class="tm-pill tm-pill-video">Has Link</span>' : ''}
+                  ${(task.credentialsFields && task.credentialsFields.length) ? '<span class="tm-pill" style="background:#f3e8fd;color:#7b2fbf">Collects Credentials</span>' : ''}
+                </div>
+              </div>
+              <div class="tm-actions">
+                <button class="btn-edit" onclick="openEditModal('${task.id}')">Edit</button>
+                <button class="btn-del" onclick="deleteTask('${task.id}', '${escHtml(task.title).replace(/'/g,"\\'")}')">Delete</button>
+              </div>
+            </div>
+          `).join('')}
+          <div class="tm-add-row">
+            <button class="tm-add-btn" onclick="openAddModal('${escHtml(platform)}')">
+              + &nbsp;Add task to ${escHtml(platform)}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  document.getElementById('task-manager-list').innerHTML = html;
+}
+
+function openAddModal(platform) {
+  editingTaskId = null;
+  document.getElementById('modal-title').textContent = 'Add New Task';
+  document.getElementById('modal-task-title').value = '';
+  document.getElementById('modal-task-desc').value = '';
+  document.getElementById('modal-requires-upload').checked = false;
+  document.getElementById('modal-upload-label').value = '';
+  document.getElementById('modal-upload-label-group').style.display = 'none';
+  document.getElementById('modal-video-url').value = '';
+  document.getElementById('modal-link-label').value = '';
+  document.getElementById('modal-requires-creds').checked = false;
+  document.getElementById('modal-creds-fields').value = '';
+  document.getElementById('modal-creds-group').style.display = 'none';
+  document.getElementById('modal-save-btn').textContent = 'Add Task';
+  document.getElementById('modal-error').classList.remove('show');
+
+  // Rebuild platform dropdown with all current platforms + custom ones
+  rebuildPlatformDropdown(platform);
+
+  document.getElementById('task-modal').classList.add('show');
+}
+
+function openEditModal(taskId) {
+  const task = allTasks.find(t => t.id === taskId);
+  if (!task) return;
+  editingTaskId = taskId;
+  document.getElementById('modal-title').textContent = 'Edit Task';
+  document.getElementById('modal-task-title').value = task.title;
+  document.getElementById('modal-task-desc').value = task.description || '';
+  document.getElementById('modal-requires-upload').checked = !!task.requiresUpload;
+  document.getElementById('modal-upload-label').value = task.uploadLabel || '';
+  document.getElementById('modal-upload-label-group').style.display = task.requiresUpload ? '' : 'none';
+  document.getElementById('modal-video-url').value = task.videoUrl || '';
+  document.getElementById('modal-link-label').value = task.linkLabel || '';
+  const hasCreds = Array.isArray(task.credentialsFields) && task.credentialsFields.length > 0;
+  document.getElementById('modal-requires-creds').checked = hasCreds;
+  document.getElementById('modal-creds-fields').value = hasCreds ? task.credentialsFields.join(', ') : '';
+  document.getElementById('modal-creds-group').style.display = hasCreds ? '' : 'none';
+  document.getElementById('modal-save-btn').textContent = 'Save Changes';
+  document.getElementById('modal-error').classList.remove('show');
+  rebuildPlatformDropdown(task.platform);
+  document.getElementById('task-modal').classList.add('show');
+}
+
+function rebuildPlatformDropdown(selectedPlatform) {
+  const platforms = getPlatformList();
+  const sel = document.getElementById('modal-platform');
+  sel.innerHTML = platforms.map(p => `<option value="${escHtml(p)}" ${p===selectedPlatform?'selected':''}>${escHtml(p)}</option>`).join('');
+}
+
+document.getElementById('modal-requires-upload').addEventListener('change', function() {
+  document.getElementById('modal-upload-label-group').style.display = this.checked ? '' : 'none';
+});
+document.getElementById('modal-requires-creds').addEventListener('change', function() {
+  document.getElementById('modal-creds-group').style.display = this.checked ? '' : 'none';
+});
+
+async function saveTask() {
+  const title = document.getElementById('modal-task-title').value.trim();
+  const platform = document.getElementById('modal-platform').value;
+  const description = document.getElementById('modal-task-desc').value.trim();
+  const requiresUpload = document.getElementById('modal-requires-upload').checked;
+  const uploadLabel = document.getElementById('modal-upload-label').value.trim();
+  const videoUrl = document.getElementById('modal-video-url').value.trim();
+  const linkLabel = document.getElementById('modal-link-label').value.trim();
+  const wantsCreds = document.getElementById('modal-requires-creds').checked;
+  const credentialsFields = wantsCreds
+    ? document.getElementById('modal-creds-fields').value.split(',').map(s => s.trim()).filter(Boolean)
+    : [];
+  const errEl = document.getElementById('modal-error');
+
+  if (!title) { errEl.textContent = 'Task title is required.'; errEl.classList.add('show'); return; }
+  errEl.classList.remove('show');
+
+  const btn = document.getElementById('modal-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    let res, data;
+    if (editingTaskId) {
+      res = await fetch('/api/tasks/admin/' + editingTaskId, {
+        method: 'PATCH', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ title, description, requiresUpload, uploadLabel, platform, videoUrl, linkLabel, credentialsFields }), credentials: 'include'
+      });
+    } else {
+      res = await fetch('/api/tasks/admin/create', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ platform, title, description, requiresUpload, uploadLabel, videoUrl, linkLabel, credentialsFields }), credentials: 'include'
+      });
+    }
+    data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Failed to save.'; errEl.classList.add('show'); btn.disabled=false; btn.textContent='Save Task'; return; }
+
+    closeModal();
+    await loadData();
+    switchTab('tasks', document.querySelector('.tab-btn:nth-child(2)'));
+  } catch(e) { errEl.textContent = 'Network error. Try again.'; errEl.classList.add('show'); }
+  btn.disabled=false; btn.textContent = editingTaskId ? 'Save Changes' : 'Add Task';
+}
+
+async function deleteTask(taskId, taskTitle) {
+  if (!confirm(`Delete task "${taskTitle}"?\n\nThis will also remove all franchisee completions for this task. This cannot be undone.`)) return;
+  const res = await fetch('/api/tasks/admin/' + taskId, { method: 'DELETE', credentials: 'include' });
+  if (res.ok) { await loadData(); switchTab('tasks', document.querySelector('.tab-btn:nth-child(2)')); }
+  else { const d = await res.json(); alert(d.error || 'Failed to delete task.'); }
+}
+
+function openAddPlatformModal() {
+  document.getElementById('new-platform-name').value = '';
+  document.getElementById('platform-error').classList.remove('show');
+  document.getElementById('platform-modal').classList.add('show');
+}
+
+function addPlatform() {
+  const name = document.getElementById('new-platform-name').value.trim();
+  const errEl = document.getElementById('platform-error');
+  if (!name) { errEl.textContent = 'Please enter a platform name.'; errEl.classList.add('show'); return; }
+  if (getPlatformList().map(p=>p.toLowerCase()).includes(name.toLowerCase())) {
+    errEl.textContent = 'That platform already exists.'; errEl.classList.add('show'); return;
+  }
+  customPlatforms.push(name);
+  closePlatformModal();
+  renderTaskManager();
+  // Auto-switch to task manager tab
+  switchTab('tasks', document.querySelector('.tab-btn:nth-child(2)'));
+  // Scroll to bottom
+  setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+}
+
+function closeModal() { document.getElementById('task-modal').classList.remove('show'); }
+function closePlatformModal() { document.getElementById('platform-modal').classList.remove('show'); }
+
+// Close modals on overlay click
+document.getElementById('task-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+document.getElementById('platform-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closePlatformModal(); });
+
+// ── VIDEO MANAGER ─────────────────────────────────────────
+
+function renderVideoManager() {
+  const platforms = getPlatformList();
+  const byPlatform = {};
+  platforms.forEach(p => byPlatform[p] = []);
+  allTasks.forEach(t => { if (!byPlatform[t.platform]) byPlatform[t.platform] = []; byPlatform[t.platform].push(t); });
+
+  let html = '';
+  platforms.forEach(platform => {
+    const tasks = byPlatform[platform] || [];
+    if (!tasks.length) return;
+    html += `<div style="margin-bottom:28px;">
+      <div style="font-family:var(--font-headline);font-size:20px;font-weight:700;text-transform:uppercase;color:var(--pg-dark-green);margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+        <span class="platform-badge">${escHtml(platform)}</span>
+      </div>`;
+    tasks.forEach(task => {
+      html += `<div style="background:white;border-radius:8px;padding:16px 20px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+        <div style="font-weight:700;font-size:15px;margin-bottom:9px;">${escHtml(task.title)}</div>
+        <div class="video-edit-row">
+          <input class="form-input video-edit-input" type="url" id="vid-${task.id}" value="${escHtml(task.videoUrl||'')}" placeholder="https://youtube.com/watch?v=..." />
+          <button class="btn btn-primary btn-sm" onclick="saveVideoUrl('${task.id}')">Save</button>
+          ${task.videoUrl ? `<button class="btn btn-sm btn-outline" onclick="clearVideoUrl('${task.id}')">Clear</button>` : ''}
+        </div>
+        <div class="video-status" id="vstatus-${task.id}">✓ Saved!</div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  document.getElementById('video-task-list').innerHTML = html;
+}
+
+async function saveVideoUrl(taskId) {
+  const url = document.getElementById('vid-' + taskId).value.trim();
+  const res = await fetch('/api/tasks/' + taskId + '/video', { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({videoUrl:url}), credentials:'include' });
+  if (res.ok) {
+    const s = document.getElementById('vstatus-' + taskId);
+    s.style.display = 'block';
+    setTimeout(() => { s.style.display = 'none'; }, 2000);
+    const t = allTasks.find(t => t.id === taskId);
+    if (t) t.videoUrl = url;
+  }
+}
+
+async function clearVideoUrl(taskId) {
+  document.getElementById('vid-' + taskId).value = '';
+  await saveVideoUrl(taskId);
+  renderVideoManager();
+}
+
+// ── TABS ──────────────────────────────────────────────────
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+async function logout() {
+  await fetch('/api/auth/logout', {method:'POST', credentials:'include'});
+  window.location.href = '/';
+}
+
+function escHtml(s) { if(!s)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDate(d) { if(!d)return''; try { return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch { return d; } }
+
+// ══════ UPCOMING LOCATIONS ══════════════════════════════
+let allUpcoming = [];
+let editingUpcomingId = null;
+let linkingLocationId = null;
+
+async function loadUpcoming() {
+  try {
+    allUpcoming = await fetch('/api/admin/upcoming', {credentials:'include'}).then(r=>r.json());
+    renderUpcoming();
+  } catch(e) { console.error(e); }
+}
+
+function renderUpcoming() {
+  const grid = document.getElementById('upcoming-grid');
+  if (!grid) return;
+  if (!allUpcoming.length) {
+    grid.innerHTML = '<div style="text-align:center;padding:48px;color:var(--ink-3);font-family:var(--font-mono);font-size:11px;letter-spacing:1.4px;">NO UPCOMING LOCATIONS YET</div>';
+    return;
+  }
+  grid.innerHTML = allUpcoming.map(loc => `
+    <div class="franchisee-card" id="up-${loc.id}">
+      <div class="fc-header" onclick="toggleUpcoming('${loc.id}')">
+
+        <div class="fc-info">
+          <div class="fc-name">${escHtml(loc.storeName)}
+            ${loc.linkedUserId ? '<span class="up-linked" style="margin-left:8px">Linked</span>' : '<span class="up-badge" style="margin-left:8px">Pipeline</span>'}
+            ${loc.inviteSentAt ? '<span class="invite-sent">Invite Sent</span>' : '<span class="invite-not-sent">Not Invited</span>'}
+          </div>
+          <div class="fc-meta">${escHtml(loc.ownerName || 'No owner set')} &nbsp;&middot;&nbsp; Opens ${formatDate(loc.plannedOpenDate)}</div>
+        </div>
+        <div class="fc-progress-col">
+          <span class="fc-pct" style="color:var(--pg-orange-text)">${loc.pct}%</span>
+          <span class="days-out" style="color:var(--ink-4)">${loc.completedCount}/${loc.totalCount}</span>
+        </div>
+        <span class="fc-expand">&#9660;</span>
+      </div>
+      <div class="fc-detail"><div class="fc-detail-inner" id="up-detail-${loc.id}"><div style="text-align:center;padding:20px;color:var(--ink-3);font-family:var(--font-mono);font-size:11px;letter-spacing:1.3px;">LOADING</div></div></div>
+    </div>
+  `).join('');
+}
+
+async function toggleUpcoming(id) {
+  const card = document.getElementById('up-' + id);
+  const isOpen = card.classList.contains('open');
+  card.classList.toggle('open', !isOpen);
+  if (!isOpen) await loadUpcomingDetail(id);
+}
+
+async function loadUpcomingDetail(id) {
+  const loc = allUpcoming.find(l => l.id === id);
+  const tasks = await fetch('/api/admin/upcoming/' + id + '/tasks', {credentials:'include'}).then(r=>r.json());
+  const detail = document.getElementById('up-detail-' + id);
+  const platforms = getPlatformList();
+
+  let html = `<div class="fc-info-row">
+    <div class="fc-info-item"><label>Address</label><span>${escHtml(loc.storeAddress || 'Not set')}</span></div>
+    <div class="fc-info-item"><label>Owner Email</label><span>${escHtml(loc.ownerEmail || 'Not set')}</span></div>
+    <div class="fc-info-item"><label>Owner Phone</label><span>${escHtml(loc.ownerPhone || 'Not set')}</span></div>
+  </div>`;
+
+  // Invite status banner
+  if (loc.inviteSentAt) {
+    html += `<div class="invite-banner sent">
+      <div class="ib-text">
+        <strong style="color:#046A38;">Invite email sent</strong>
+        <span style="color:#4a7a62;">Sent ${formatDateTime(loc.inviteSentAt)} to ${escHtml(loc.ownerEmail)}${loc.inviteCount > 1 ? ` · sent ${loc.inviteCount} times` : ''}</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button class="btn btn-outline btn-sm" style="white-space:nowrap" onclick="openInvitePreview('${id}')">Copy</button>
+        <button class="btn btn-outline btn-sm" style="white-space:nowrap" onclick="sendInvite('${id}', true)">Resend</button>
+      </div>
+    </div>`;
+  } else {
+    html += `<div class="invite-banner unsent">
+      <div class="ib-text">
+        <strong style="color:#7a5c00;">No invite sent yet</strong>
+        <span style="color:#8a6d1f;">${loc.ownerEmail ? 'Send the welcome email so they can register and start onboarding.' : 'Add an owner email to this location before sending an invite.'}</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button class="btn btn-outline btn-sm" style="white-space:nowrap;${loc.ownerEmail ? '' : 'opacity:0.45;pointer-events:none;'}" onclick="openInvitePreview('${id}')">Send From My Gmail</button>
+        <button class="btn btn-sm" style="background:#046A38;color:white;border:none;border-radius:6px;padding:10px 18px;font-weight:700;white-space:nowrap;cursor:pointer;${loc.ownerEmail ? '' : 'opacity:0.45;cursor:not-allowed;'}" ${loc.ownerEmail ? `onclick="sendInvite('${id}', false)"` : 'disabled'}>Send Automatically</button>
+      </div>
+    </div>`;
+  }
+
+  if (loc.notes) html += `<div class="up-notes"><strong>Notes:</strong> ${escHtml(loc.notes)}</div>`;
+
+  // Tasks grouped by platform
+  const byPlatform = {};
+  tasks.forEach(t => { if (!byPlatform[t.platform]) byPlatform[t.platform] = []; byPlatform[t.platform].push(t); });
+
+  html += `<div style="font-family:var(--font-headline);font-size:18px;font-weight:700;text-transform:uppercase;color:var(--pg-dark-green);margin:20px 0 12px;">Prep Tasks</div>`;
+
+  platforms.forEach(platform => {
+    const pts = byPlatform[platform];
+    if (!pts || !pts.length) return;
+    const done = pts.filter(t => t.completed).length;
+    html += `<div class="pt-platform-header"><span class="platform-badge">${escHtml(platform)}</span><span style="font-family:var(--font-mono);font-size:10px;letter-spacing:1.1px;color:var(--ink-3)">${done} OF ${pts.length}</span></div>`;
+    pts.forEach(t => {
+      html += `<div class="internal-task-row${t.completed?' done':''}">
+        <div class="internal-check" onclick="toggleUpcomingTask('${t.id}', ${!t.completed}, '${id}')">${t.completed?'✓':''}</div>
+        <div class="internal-task-title">${escHtml(t.title)}</div>
+        <button class="internal-del" onclick="deleteUpcomingTask('${t.id}', '${id}')">✕</button>
+      </div>`;
+    });
+  });
+
+  if (!tasks.length) html += `<div style="font-size:13.5px;color:var(--ink-3);padding:10px 0;">No prep tasks yet. Click Sync Master Tasks below to pull in the full onboarding checklist.</div>`;
+
+  const platformOptions = platforms.map(p => `<option value="${escHtml(p)}">${escHtml(p)}</option>`).join('');
+  html += `
+    <div class="internal-add-row">
+      <select class="form-input" id="upt-platform-${id}" style="flex:0 0 140px;font-size:13px;padding:9px 12px">${platformOptions}</select>
+      <input class="form-input" type="text" id="upt-title-${id}" placeholder="Add prep task..." style="font-size:13px;padding:9px 12px" onkeydown="if(event.key==='Enter') addUpcomingTask('${id}')" />
+      <button class="btn btn-sm" style="background:var(--pg-orange);color:white;border:none;cursor:pointer;border-radius:6px;padding:9px 16px;font-weight:700;white-space:nowrap" onclick="addUpcomingTask('${id}')">+ Add</button>
+    </div>
+    <div class="up-actions">
+      <button class="btn btn-outline btn-sm" onclick="syncUpcomingTasks('${id}')">Sync Master Tasks</button>
+      <button class="btn btn-outline btn-sm" onclick="editUpcomingLocation('${id}')">Edit Details</button>
+      <button class="btn btn-outline btn-sm" onclick="openLinkModal('${id}')">${loc.linkedUserId ? 'Change Link' : 'Link to Account'}</button>
+      <button class="btn-del" onclick="deleteUpcomingLocation('${id}', '${escHtml(loc.storeName).replace(/'/g,"\\'")}')">Delete Location</button>
+    </div>`;
+
+  detail.innerHTML = html;
+}
+
+function openUpcomingModal() {
+  editingUpcomingId = null;
+  document.getElementById('up-modal-title').textContent = 'Add Upcoming Location';
+  ['up-storeName','up-storeAddress','up-ownerName','up-openDate','up-ownerEmail','up-ownerPhone','up-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('up-save-btn').textContent = 'Add Location';
+  document.getElementById('up-modal-error').classList.remove('show');
+  document.getElementById('upcoming-modal').classList.add('show');
+}
+
+function editUpcomingLocation(id) {
+  const loc = allUpcoming.find(l => l.id === id);
+  if (!loc) return;
+  editingUpcomingId = id;
+  document.getElementById('up-modal-title').textContent = 'Edit Location';
+  document.getElementById('up-storeName').value = loc.storeName || '';
+  document.getElementById('up-storeAddress').value = loc.storeAddress || '';
+  document.getElementById('up-ownerName').value = loc.ownerName || '';
+  document.getElementById('up-openDate').value = loc.plannedOpenDate || '';
+  document.getElementById('up-ownerEmail').value = loc.ownerEmail || '';
+  document.getElementById('up-ownerPhone').value = loc.ownerPhone || '';
+  document.getElementById('up-notes').value = loc.notes || '';
+  document.getElementById('up-save-btn').textContent = 'Save Changes';
+  document.getElementById('up-modal-error').classList.remove('show');
+  document.getElementById('upcoming-modal').classList.add('show');
+}
+
+async function saveUpcomingLocation() {
+  const payload = {
+    storeName: document.getElementById('up-storeName').value.trim(),
+    storeAddress: document.getElementById('up-storeAddress').value.trim(),
+    ownerName: document.getElementById('up-ownerName').value.trim(),
+    plannedOpenDate: document.getElementById('up-openDate').value,
+    ownerEmail: document.getElementById('up-ownerEmail').value.trim(),
+    ownerPhone: document.getElementById('up-ownerPhone').value.trim(),
+    notes: document.getElementById('up-notes').value.trim()
+  };
+  const err = document.getElementById('up-modal-error');
+  if (!payload.storeName || !payload.plannedOpenDate) {
+    err.textContent = 'Store name and planned open date are required.'; err.classList.add('show'); return;
+  }
+  err.classList.remove('show');
+  const btn = document.getElementById('up-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const url = editingUpcomingId ? '/api/admin/upcoming/' + editingUpcomingId : '/api/admin/upcoming';
+    const res = await fetch(url, {
+      method: editingUpcomingId ? 'PATCH' : 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload), credentials: 'include'
+    });
+    const data = await res.json();
+    if (!res.ok) { err.textContent = data.error || 'Failed.'; err.classList.add('show'); btn.disabled=false; btn.textContent='Save'; return; }
+    closeUpcomingModal();
+    await loadUpcoming();
+    await loadCalendar();
+  } catch(e) { err.textContent = 'Network error.'; err.classList.add('show'); }
+  btn.disabled = false; btn.textContent = editingUpcomingId ? 'Save Changes' : 'Add Location';
+}
+
+async function deleteUpcomingLocation(id, name) {
+  if (!confirm(`Delete "${name}"?\n\nThis removes the location and all its prep tasks. This cannot be undone.`)) return;
+  const res = await fetch('/api/admin/upcoming/' + id, { method:'DELETE', credentials:'include' });
+  if (res.ok) { await loadUpcoming(); await loadCalendar(); }
+}
+
+async function addUpcomingTask(locationId) {
+  const platform = document.getElementById('upt-platform-' + locationId).value;
+  const title = document.getElementById('upt-title-' + locationId).value.trim();
+  if (!title) return;
+  const res = await fetch('/api/admin/upcoming/' + locationId + '/tasks', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({platform, title}), credentials:'include'
+  });
+  if (res.ok) { await loadUpcoming(); await loadUpcomingDetail(locationId); }
+}
+
+async function toggleUpcomingTask(taskId, completed, locationId) {
+  await fetch('/api/admin/upcoming-tasks/' + taskId + '/toggle', {
+    method:'PATCH', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({completed}), credentials:'include'
+  });
+  await loadUpcoming();
+  await loadUpcomingDetail(locationId);
+}
+
+async function deleteUpcomingTask(taskId, locationId) {
+  if (!confirm('Delete this prep task?')) return;
+  await fetch('/api/admin/upcoming-tasks/' + taskId, { method:'DELETE', credentials:'include' });
+  await loadUpcoming();
+  await loadUpcomingDetail(locationId);
+}
+
+
+function formatDateTime(d) {
+  if (!d) return '';
+  try { return new Date(d).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}); }
+  catch { return d; }
+}
+
+
+// ══ Invite preview / send from own Gmail ══
+let previewData = null;
+let previewLocationId = null;
+
+async function openInvitePreview(locationId) {
+  previewLocationId = locationId;
+  try {
+    previewData = await fetch('/api/admin/upcoming/' + locationId + '/invite-preview', {credentials:'include'}).then(r=>r.json());
+    document.getElementById('pv-to').value = previewData.to || '(no owner email set)';
+    document.getElementById('pv-subject').value = previewData.subject;
+    const frame = document.getElementById('pv-frame');
+    frame.srcdoc = previewData.html;
+    document.getElementById('preview-modal').classList.add('show');
+  } catch(e) { alert('Could not load the email preview.'); }
+}
+
+function closePreviewModal() { document.getElementById('preview-modal').classList.remove('show'); }
+
+async function copyInviteRich() {
+  if (!previewData) return;
+  try {
+    const blob = new Blob([previewData.html], { type: 'text/html' });
+    const plain = new Blob([previewData.text || ''], { type: 'text/plain' });
+    await navigator.clipboard.write([new ClipboardItem({ 'text/html': blob, 'text/plain': plain })]);
+    alert('Email copied with formatting.\n\nOpen Gmail, click Compose, paste into the message body, and add the subject line.');
+  } catch(e) {
+    await navigator.clipboard.writeText(previewData.text || '');
+    alert('Copied as plain text. Your browser blocked formatted copying.');
+  }
+}
+
+async function copyInvitePlain() {
+  if (!previewData) return;
+  await navigator.clipboard.writeText(previewData.text || '');
+  alert('Copied as plain text.');
+}
+
+function openInGmail() {
+  if (!previewData) return;
+  const url = 'https://mail.google.com/mail/?view=cm&fs=1'
+    + '&to=' + encodeURIComponent(previewData.to || '')
+    + '&su=' + encodeURIComponent(previewData.subject || '')
+    + '&body=' + encodeURIComponent(previewData.text || '');
+  window.open(url, '_blank');
+}
+
+async function markInvited() {
+  if (!previewLocationId) return;
+  if (!confirm('Mark this location as invited? Do this after you have actually sent the email.')) return;
+  const res = await fetch('/api/admin/upcoming/' + previewLocationId + '/mark-invited', {
+    method:'POST', credentials:'include'
+  });
+  if (res.ok) {
+    closePreviewModal();
+    await loadUpcoming();
+    await loadUpcomingDetail(previewLocationId);
+  }
+}
+
+async function sendInvite(locationId, isResend) {
+  const loc = allUpcoming.find(l => l.id === locationId);
+  const verb = isResend ? 'Resend' : 'Send';
+  if (!confirm(`${verb} the welcome email to ${loc.ownerName || 'the owner'} at ${loc.ownerEmail}?`)) return;
+
+  const banner = document.querySelector(`#up-detail-${locationId} .invite-banner button`);
+  if (banner) { banner.disabled = true; banner.textContent = 'Sending…'; }
+
+  const restore = () => { if (banner) { banner.disabled = false; banner.textContent = isResend ? 'Resend' : 'Send to Franchisee'; } };
+
+  // Don't let the button hang forever if the mail server is unreachable
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 35000);
+
+  try {
+    const res = await fetch('/api/admin/upcoming/' + locationId + '/send-invite', {
+      method: 'POST', credentials: 'include', signal: ctrl.signal
+    });
+    clearTimeout(timer);
+    const d = await res.json();
+    if (!res.ok) { alert(d.error || 'Failed to send invite.'); restore(); return; }
+    await loadUpcoming();
+    await loadUpcomingDetail(locationId);
+    alert(`Welcome email sent to ${loc.ownerEmail}`);
+  } catch (e) {
+    clearTimeout(timer);
+    alert(e.name === 'AbortError'
+      ? 'The mail server did not respond in time. The email was not sent. Check your email settings in Railway.'
+      : 'Network error. Please try again.');
+    restore();
+  }
+}
+
+async function syncUpcomingTasks(locationId) {
+  const res = await fetch('/api/admin/upcoming/' + locationId + '/sync-tasks', {
+    method: 'POST', credentials: 'include'
+  });
+  if (res.ok) {
+    const d = await res.json();
+    await loadUpcoming();
+    await loadUpcomingDetail(locationId);
+    alert(d.added > 0
+      ? `Added ${d.added} task${d.added !== 1 ? 's' : ''} from the master checklist.`
+      : 'Already up to date. No new tasks to add.');
+  }
+}
+
+function openLinkModal(locationId) {
+  linkingLocationId = locationId;
+  const loc = allUpcoming.find(l => l.id === locationId);
+  const sel = document.getElementById('link-user-select');
+  sel.innerHTML = '<option value="">Not linked</option>' +
+    allFranchisees.map(f => `<option value="${f.id}" ${loc.linkedUserId===f.id?'selected':''}>${escHtml(f.storeName)} (${escHtml(f.email)})</option>`).join('');
+  document.getElementById('link-error').classList.remove('show');
+  document.getElementById('link-modal').classList.add('show');
+}
+
+async function saveLinkAccount() {
+  const userId = document.getElementById('link-user-select').value;
+  const res = await fetch('/api/admin/upcoming/' + linkingLocationId + '/link', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({userId}), credentials:'include'
+  });
+  if (res.ok) { closeLinkModal(); await loadUpcoming(); }
+}
+
+function closeUpcomingModal() { document.getElementById('upcoming-modal').classList.remove('show'); }
+function closeLinkModal() { document.getElementById('link-modal').classList.remove('show'); }
+function closeDayModal() { document.getElementById('day-modal').classList.remove('show'); }
+
+// ══════ CALENDAR ════════════════════════════════════════
+let calendarEvents = [];
+let calMonth = new Date().getMonth();
+let calYear = new Date().getFullYear();
+
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+async function loadCalendar() {
+  try {
+    calendarEvents = await fetch('/api/admin/calendar', {credentials:'include'}).then(r=>r.json());
+    renderCalendar();
+  } catch(e) { console.error(e); }
+}
+
+function renderCalendar() {
+  const titleEl = document.getElementById('cal-month-title');
+  const gridEl = document.getElementById('cal-grid');
+  if (!titleEl || !gridEl) return;
+
+  titleEl.textContent = MONTH_NAMES[calMonth] + ' ' + calYear;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+  const isCurrentMonth = today.getMonth() === calMonth && today.getFullYear() === calYear;
+
+  // Group events by date string YYYY-MM-DD
+  const byDate = {};
+  calendarEvents.forEach(ev => {
+    if (!ev.date) return;
+    const d = ev.date.split('T')[0];
+    if (!byDate[d]) byDate[d] = [];
+    byDate[d].push(ev);
+  });
+
+  let html = '';
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-cell empty"></div>';
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const events = byDate[dateStr] || [];
+    const isToday = isCurrentMonth && today.getDate() === day;
+    const cls = 'cal-cell' + (isToday ? ' today' : '') + (events.length ? ' has-events' : '');
+    const onclick = events.length ? `onclick="openDayModal('${dateStr}')"` : '';
+
+    html += `<div class="${cls}" ${onclick}>
+      <div class="cal-day-num">${day}</div>
+      ${events.slice(0,2).map(ev => {
+        const st = ev.type === 'active' ? getStatus(ev.date, ev.pct).key : 'upcoming';
+        const bg = st==='red' ? '#FDF2F1' : st==='yellow' ? '#FFF6E8' : st==='upcoming' ? '#FFF6E8' : '#F2F8EC';
+        const fg = st==='red' ? '#C0392B' : st==='yellow' ? '#B36B00' : st==='upcoming' ? '#B36B00' : '#046A38';
+        const bd = st==='red' ? '#C0392B' : st==='yellow' ? '#FF912E' : st==='upcoming' ? '#FF912E' : '#046A38';
+        return `<div class="cal-event" style="background:${bg};color:${fg};border-left:3px solid ${bd}">${escHtml(ev.storeName)}</div>`;
+      }).join('')}
+      ${events.length > 2 ? `<div class="cal-more">+${events.length-2} more</div>` : ''}
+    </div>`;
+  }
+
+  gridEl.innerHTML = html;
+}
+
+function changeMonth(delta) {
+  calMonth += delta;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+}
+
+function goToToday() {
+  const t = new Date();
+  calMonth = t.getMonth();
+  calYear = t.getFullYear();
+  renderCalendar();
+}
+
+function openDayModal(dateStr) {
+  const events = calendarEvents.filter(ev => ev.date && ev.date.split('T')[0] === dateStr);
+  if (!events.length) return;
+
+  const d = new Date(dateStr + 'T00:00:00');
+  document.getElementById('day-modal-title').textContent =
+    d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+
+  document.getElementById('day-modal-list').innerHTML = events.map(ev => {
+    const st = ev.type === 'active' ? getStatus(ev.date, ev.pct) : { key:'upcoming', label:'Pipeline' };
+    const barColor = st.key === 'red' ? '#C0392B' : st.key === 'yellow' ? '#FF912E' : st.key === 'upcoming' ? '#FF912E' : '#046A38';
+    return `
+      <div class="day-event-card ${ev.type}">
+        <div class="de-top">
+          <div>
+            <div class="de-name">${escHtml(ev.storeName)}</div>
+            <div class="de-meta">${escHtml(ev.ownerName || 'No owner set')}${ev.storeAddress ? ' · ' + escHtml(ev.storeAddress) : ''}</div>
+          </div>
+          <span class="de-type-badge" style="background:${barColor}22;color:${barColor}">${ev.type === 'active' ? st.label : 'Pipeline'}</span>
+        </div>
+        <div class="de-stats">
+          <div class="de-stat">
+            <div class="de-stat-val" style="color:${barColor}">${ev.completedCount}</div>
+            <div class="de-stat-label">Completed</div>
+          </div>
+          <div class="de-stat">
+            <div class="de-stat-val" style="color:#c0392b">${ev.remainingCount}</div>
+            <div class="de-stat-label">Remaining</div>
+          </div>
+          <div class="de-stat">
+            <div class="de-stat-val" style="color:var(--ink-4)">${ev.totalCount}</div>
+            <div class="de-stat-label">Total Tasks</div>
+          </div>
+        </div>
+        <div class="de-bar-wrap"><div class="de-bar" style="width:${ev.pct}%;background:${barColor}"></div></div>
+        <button class="btn btn-primary btn-sm btn-full" onclick="jumpToLocation('${ev.id}','${ev.type}')">Open ${ev.type === 'active' ? 'Dashboard' : 'Location'}</button>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('day-modal').classList.add('show');
+}
+
+async function jumpToLocation(id, type) {
+  closeDayModal();
+  if (type === 'active') {
+    switchTab('franchisees', document.querySelectorAll('.tab-btn')[0]);
+    setTimeout(async () => {
+      const card = document.getElementById('fc-' + id);
+      if (card) {
+        if (!card.classList.contains('open')) { card.classList.add('open'); await loadFranchiseeDetail(id); }
+        card.scrollIntoView({ behavior:'smooth', block:'center' });
+      }
+    }, 120);
+  } else {
+    switchTab('upcoming', document.querySelectorAll('.tab-btn')[1]);
+    setTimeout(async () => {
+      const card = document.getElementById('up-' + id);
+      if (card) {
+        if (!card.classList.contains('open')) { card.classList.add('open'); await loadUpcomingDetail(id); }
+        card.scrollIntoView({ behavior:'smooth', block:'center' });
+      }
+    }, 120);
+  }
+}
+
+// Any open modal closes on overlay click or the Escape key
+const ALL_MODALS = ['task-modal','platform-modal','upcoming-modal','preview-modal','link-modal','day-modal'];
+
+ALL_MODALS.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', e => { if (e.target === e.currentTarget) el.classList.remove('show'); });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  ALL_MODALS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('show');
+  });
+});
+
+init();
+
+</script>
+
+<!-- ADD/EDIT UPCOMING LOCATION MODAL -->
+<div class="modal-overlay" id="upcoming-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeUpcomingModal()" aria-label="Close">&#10005;</button>
+    <div class="modal-title" id="up-modal-title">Add Upcoming Location</div>
+    <div class="modal-body">
+    <div class="alert alert-error" id="up-modal-error"></div>
+    <div class="form-group">
+      <label class="form-label">Store Name *</label>
+      <input class="form-input" type="text" id="up-storeName" placeholder="Pure Green Fort Lauderdale" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Store Address</label>
+      <input class="form-input" type="text" id="up-storeAddress" placeholder="123 Las Olas Blvd, Fort Lauderdale, FL" />
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-group">
+        <label class="form-label">Owner Name</label>
+        <input class="form-input" type="text" id="up-ownerName" placeholder="Jane Smith" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Planned Open Date *</label>
+        <input class="form-input" type="date" id="up-openDate" />
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-group">
+        <label class="form-label">Owner Email</label>
+        <input class="form-input" type="email" id="up-ownerEmail" placeholder="jane@email.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Owner Phone</label>
+        <input class="form-input" type="tel" id="up-ownerPhone" placeholder="(555) 123-4567" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Internal Notes</label>
+      <textarea class="form-input" id="up-notes" rows="2" style="resize:vertical" placeholder="Lease signed, waiting on permits..."></textarea>
+    </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeUpcomingModal()">Cancel</button>
+      <button class="btn btn-primary" id="up-save-btn" onclick="saveUpcomingLocation()">Add Location</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVITE PREVIEW MODAL -->
+<div class="modal-overlay" id="preview-modal">
+  <div class="modal" style="max-width:720px;">
+    <button class="modal-close" onclick="closePreviewModal()" aria-label="Close">&#10005;</button>
+    <div class="modal-title">Send From Your Own Gmail</div>
+    <div class="modal-body">
+    <div class="copy-note">
+      Emails sent from the portal can land in spam until your domain is verified.
+      Sending from your own Gmail avoids that entirely. Copy the email below, paste it into a new Gmail message, and send it yourself.
+    </div>
+    <div class="form-group">
+      <label class="form-label">To</label>
+      <input class="form-input" type="text" id="pv-to" readonly />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Subject</label>
+      <input class="form-input" type="text" id="pv-subject" readonly />
+    </div>
+    <label class="form-label">Email Body</label>
+    <iframe class="preview-frame" id="pv-frame"></iframe>
+    <div class="preview-actions">
+      <button class="btn btn-primary btn-sm" onclick="copyInviteRich()">Copy Email</button>
+      <button class="btn btn-outline btn-sm" onclick="copyInvitePlain()">Copy as plain text</button>
+      <button class="btn btn-outline btn-sm" onclick="openInGmail()">Open Gmail</button>
+    </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closePreviewModal()">Close</button>
+      <button class="btn btn-secondary" onclick="markInvited()">Mark as Sent</button>
+    </div>
+  </div>
+</div>
+
+<!-- LINK TO ACCOUNT MODAL -->
+<div class="modal-overlay" id="link-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeLinkModal()" aria-label="Close">&#10005;</button>
+    <div class="modal-title">Link to Registered Account</div>
+    <div class="modal-body">
+    <div class="alert alert-error" id="link-error"></div>
+    <p style="font-size:14px;color:var(--ink-3);margin-bottom:20px;">Connect this upcoming location to a franchisee who has now registered on the portal.</p>
+    <div class="form-group">
+      <label class="form-label">Select Registered Franchisee</label>
+      <select class="form-input" id="link-user-select"></select>
+    </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeLinkModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveLinkAccount()">Link Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- DAY DETAIL POPUP -->
+<div class="modal-overlay" id="day-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDayModal()" aria-label="Close">&#10005;</button>
+    <div class="modal-title" id="day-modal-title">Openings</div>
+    <div class="modal-body">
+    <div class="day-popup-list" id="day-modal-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeDayModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pure Green | My Onboarding</title>
+<link rel="stylesheet" href="/css/brand.css">
+<link rel="icon" href="/img/logo-mark.svg">
+<style>
+  body { background: var(--pg-offwhite); }
+  .main { max-width: 940px; margin: 0 auto; padding: 0 32px 90px; }
+  @media(max-width:640px){ .main { padding: 0 18px 70px; } }
+
+  /* Store header */
+  .store-head { background:#fff; margin:0 -32px; padding:44px 32px 30px; border-bottom:0.5px solid var(--rule); }
+  @media(max-width:640px){ .store-head { margin:0 -18px; padding:32px 18px 24px; } }
+  .sh-top { display:flex; justify-content:space-between; align-items:flex-end; gap:26px; }
+  @media(max-width:640px){ .sh-top { flex-direction:column; align-items:flex-start; gap:18px; } }
+  .store-name { font-family:var(--font-display); font-weight:700; font-size:clamp(38px,6vw,54px); line-height:.87; letter-spacing:.5px; text-transform:uppercase; color:var(--pg-dark-green); }
+  .store-name .lt { color:var(--pg-light-green); }
+  .store-meta { font-size:14px; color:var(--ink-3); margin-top:13px; }
+  .pct-big { font-family:var(--font-display); font-weight:700; font-size:clamp(58px,9vw,84px); line-height:.8; color:var(--pg-dark-green); text-align:right; }
+  .pct-big .sym { font-size:.42em; color:var(--ink-5); }
+  .pct-sub { font-family:var(--font-mono); font-size:10px; letter-spacing:1.6px; color:var(--ink-3); text-align:right; margin-top:6px; }
+  .sh-bar { height:3px; background:var(--rule); margin-top:24px; }
+  .sh-bar > div { height:100%; background:var(--pg-light-green); transition:width .6s ease; }
+
+  /* Platform section */
+  .platform-section { margin-top:34px; }
+  .platform-header { display:flex; align-items:center; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid var(--rule-strong); cursor:pointer; user-select:none; }
+  .platform-header-left { display:flex; align-items:baseline; gap:14px; }
+  .platform-name { font-family:var(--font-display); font-weight:700; font-size:24px; letter-spacing:.4px; text-transform:uppercase; color:var(--pg-dark-green); }
+  .platform-count { font-family:var(--font-mono); font-size:11px; letter-spacing:1.3px; color:var(--ink-3); }
+  .platform-mini-progress { display:flex; align-items:center; gap:12px; }
+  .platform-pct { font-family:var(--font-mono); font-size:11px; letter-spacing:1.3px; color:var(--pg-light-green-text); }
+  .chevron { font-size:12px; color:var(--ink-5); transition:transform .2s; }
+  .platform-section.collapsed .chevron { transform:rotate(-90deg); }
+  .platform-section.collapsed .task-list { display:none; }
+
+  /* Tasks */
+  .task-list { display:block; }
+  .task-item { background:#fff; border-bottom:0.5px solid var(--rule); border-left:3px solid transparent; transition:border-color .2s; }
+  .task-item.open { border-left-color:var(--pg-dark-green); margin-left:-3px; }
+  .task-item.completed { border-left-color:transparent; }
+  .task-item-header { display:flex; align-items:center; gap:15px; padding:16px 20px; cursor:pointer; }
+  .task-check { width:19px; height:19px; border-radius:50%; border:2px solid #D6DAD8; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:#fff; transition:all .2s; }
+  .task-item.completed .task-check { background:var(--pg-light-green); border-color:var(--pg-light-green); }
+  .check-icon { display:none; color:#fff; font-size:10px; font-weight:700; line-height:1; }
+  .task-item.completed .check-icon { display:block; }
+  .task-title { font-size:15px; font-weight:700; color:var(--pg-charcoal); flex:1; }
+  .task-item.completed .task-title { color:var(--ink-4); text-decoration:line-through; font-weight:400; }
+  .task-completed-date { font-family:var(--font-mono); font-size:10px; letter-spacing:1.1px; color:var(--ink-4); white-space:nowrap; }
+  .task-expand-btn { font-size:11px; color:var(--ink-5); transition:transform .2s; flex-shrink:0; }
+  .task-item.open .task-expand-btn { transform:rotate(180deg); }
+
+  .task-body { display:none; padding:0 20px 22px 54px; }
+  .task-item.open .task-body { display:block; }
+  .task-description { font-size:14px; color:var(--ink-3); line-height:1.7; margin-bottom:17px; }
+
+  .video-link { display:inline-flex; align-items:center; gap:7px; background:#F2F8F5; border:1px solid #C3DDD1; color:var(--pg-dark-green); padding:10px 16px; border-radius:3px; font-family:var(--font-mono); font-size:11px; letter-spacing:1.2px; text-transform:uppercase; text-decoration:none; margin-bottom:16px; transition:background .18s; }
+  .video-link:hover { background:#E4F0EA; }
+
+  .upload-area { border:1px dashed #D6DAD8; border-radius:4px; padding:24px; text-align:center; cursor:pointer; transition:all .2s; margin-bottom:16px; position:relative; background:#FCFDFC; }
+  .upload-area:hover { border-color:var(--pg-dark-green); background:#F7FBF9; }
+  .upload-area input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+  .upload-icon { display:none; }
+  .upload-text { font-size:13.5px; color:var(--ink-3); }
+  .upload-text strong { color:var(--pg-dark-green); display:block; margin-bottom:4px; font-size:14px; }
+  .upload-preview { font-family:var(--font-mono); font-size:11px; letter-spacing:.9px; color:var(--pg-dark-green); margin-top:8px; }
+
+  .credentials-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-bottom:18px; }
+  @media(max-width:520px){ .credentials-grid { grid-template-columns:1fr; gap:0; } }
+  .cred-label { font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px; }
+
+  .complete-btn { background:var(--pg-dark-green); color:#fff; border:none; border-radius:3px; padding:14px 28px; font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; cursor:pointer; transition:background .18s; }
+  .complete-btn:hover { background:#035C30; }
+  .complete-btn:disabled { opacity:.4; cursor:not-allowed; }
+
+  .proof-link { display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--pg-dark-green); text-decoration:none; margin-bottom:10px; }
+  .proof-link:hover { text-decoration:underline; }
+
+  .loading { text-align:center; padding:80px; color:var(--ink-3); font-family:var(--font-mono); font-size:11px; letter-spacing:1.8px; }
+  .spinner { display:block; width:26px; height:26px; border:2px solid var(--rule); border-top-color:var(--pg-dark-green); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 16px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="pg-logo" href="/dashboard.html">
+    <img src="/img/logo-mark.svg" alt="Pure Green">
+    <span class="pg-logo-text">pure<span>green</span></span>
+  </a>
+  <div style="display:flex;align-items:center;gap:18px;">
+    <span class="meta" id="user-name">Loading</span>
+    <button class="btn btn-outline btn-sm" onclick="logout()">Sign Out</button>
+  </div>
+</nav>
+
+<div class="main" id="main">
+  <div class="loading"><span class="spinner"></span>LOADING YOUR DASHBOARD</div>
+</div>
+
+<script>
+let userData = null;
+let tasksData = [];
+let taskOverrides = {};
+
+const BASE_PLATFORMS = ['Square', 'Uber Eats', 'DoorDash', 'Grubhub', 'Stream'];
+
+// Every platform present in the master task list, base ones first,
+// then any platform the admin has added, in the order tasks arrive.
+function activePlatforms() {
+  const seen = [];
+  BASE_PLATFORMS.forEach(p => { if (tasksData.some(t => t.platform === p)) seen.push(p); });
+  tasksData.forEach(t => { if (t.platform && !seen.includes(t.platform)) seen.push(t.platform); });
+  return seen;
+}
+const PLATFORM_COLORS = {
+  'Square': 'badge-square',
+  'Uber Eats': 'badge-ubereats',
+  'DoorDash': 'badge-doordash',
+  'Grubhub': 'badge-grubhub',
+  'Stream': 'badge-stream'
+};
+
+async function init() {
+  const me = await fetch('/api/auth/me', {credentials:'include'}).then(r=>r.json());
+  if (!me.user) return window.location.href = '/';
+  if (me.user.role === 'admin') return window.location.href = '/admin.html';
+  userData = me.user;
+  document.getElementById('user-name').textContent = userData.storeName;
+
+  // Load task overrides for video URLs
+  try {
+    const adminTasks = await fetch('/api/tasks/admin/all', {credentials:'include'}).then(r=>r.json());
+    if (Array.isArray(adminTasks)) {
+      adminTasks.forEach(t => { if (t.videoUrl) taskOverrides[t.id] = t.videoUrl; });
+    }
+  } catch(e) {}
+
+  tasksData = await fetch('/api/tasks', {credentials:'include'}).then(r=>r.json());
+  // Merge video overrides
+  tasksData = tasksData.map(t => ({ ...t, videoUrl: taskOverrides[t.id] || t.videoUrl }));
+  render();
+}
+
+function render() {
+  const completed = tasksData.filter(t => t.completed).length;
+  const total = tasksData.length;
+  const pct = total ? Math.round((completed / total) * 100) : 0;
+
+  const PLATFORMS = activePlatforms();
+  const byPlatform = {};
+  PLATFORMS.forEach(p => byPlatform[p] = []);
+  tasksData.forEach(t => {
+    if (!byPlatform[t.platform]) byPlatform[t.platform] = [];
+    byPlatform[t.platform].push(t);
+  });
+
+  const parts = String(userData.storeName || '').trim().split(/\s+/);
+  const firstLine = parts.length > 1 ? parts.slice(0, Math.ceil(parts.length/2)).join(' ') : parts[0];
+  const secondLine = parts.length > 1 ? parts.slice(Math.ceil(parts.length/2)).join(' ') : '';
+
+  let html = `
+    <div class="store-head">
+      <div class="eyebrow">Your Location</div>
+      <div class="sh-top" style="margin-top:11px">
+        <div>
+          <div class="store-name">${escHtml(firstLine)}${secondLine ? `<br><span class="lt">${escHtml(secondLine)}</span>` : ''}</div>
+          <div class="store-meta">${escHtml(userData.ownerName)} &nbsp;&middot;&nbsp; Opens ${formatDate(userData.plannedOpenDate)}</div>
+        </div>
+        <div>
+          <div class="pct-big">${pct}<span class="sym">%</span></div>
+          <div class="pct-sub">${completed} OF ${total} COMPLETE</div>
+        </div>
+      </div>
+      <div class="sh-bar"><div style="width:${pct}%"></div></div>
+    </div>
+  `;
+
+  PLATFORMS.forEach(platform => {
+    const tasks = byPlatform[platform];
+    if (!tasks.length) return;
+    const done = tasks.filter(t => t.completed).length;
+    const pPct = Math.round((done / tasks.length) * 100);
+
+    html += `
+      <div class="platform-section" id="section-${platform.replace(/\s/g,'-')}">
+        <div class="platform-header" onclick="toggleSection('${platform.replace(/\s/g,'-')}')">
+          <div class="platform-header-left">
+            <span class="platform-name">${escHtml(platform)}</span>
+            <span class="platform-count">${done} OF ${tasks.length}</span>
+          </div>
+          <div class="platform-mini-progress">
+            <span class="platform-pct">${pPct}%</span>
+            <span class="chevron">&#9660;</span>
+          </div>
+        </div>
+        <div class="task-list">
+          ${tasks.map(t => renderTask(t)).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('main').innerHTML = html;
+}
+
+function renderTask(task) {
+  const hasVideo = task.videoUrl;
+  const isCompleted = task.completed;
+
+  let bodyHtml = `<div class="task-description">${escHtml(task.description)}</div>`;
+
+  if (hasVideo) {
+    bodyHtml += `<a class="video-link" href="${task.videoUrl}" target="_blank" rel="noopener">🔗 ${escHtml(task.linkLabel || 'Open Link')}</a>`;
+  }
+
+  if (!isCompleted) {
+    // Upload area
+    if (task.requiresUpload) {
+      bodyHtml += `
+        <div class="upload-area" id="upload-${task.id}" onclick="document.getElementById('file-${task.id}').click()">
+          <input type="file" id="file-${task.id}" accept="image/*,.pdf,.doc,.docx" onchange="previewFile('${task.id}', this)" />
+          <div class="upload-text"><strong>Click to upload proof</strong>${escHtml(task.uploadLabel || 'Screenshot or document')}</div>
+          <div class="upload-preview" id="preview-${task.id}"></div>
+        </div>
+      `;
+    }
+
+    // Credentials fields
+    if (task.credentialsFields) {
+      bodyHtml += `<div class="credentials-grid">`;
+      task.credentialsFields.forEach(field => {
+        const label = field.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+        const isPass = field.toLowerCase().includes('password');
+        bodyHtml += `
+          <div>
+            <div class="cred-label">${escHtml(label)}</div>
+            <input class="form-input" type="${isPass ? 'password' : 'text'}" id="cred-${task.id}-${field}" placeholder="${escHtml(label)}" />
+          </div>
+        `;
+      });
+      bodyHtml += `</div>`;
+    }
+
+    bodyHtml += `<button class="complete-btn" onclick="completeTask('${task.id}')" id="btn-${task.id}">Mark Complete</button>`;
+  } else {
+    // Show proof if available
+    if (task.uploadPath) {
+      bodyHtml += `<a class="proof-link" href="${task.uploadPath}" target="_blank">View Uploaded Proof</a><br>`;
+    }
+    bodyHtml += `<span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1.2px;color:var(--pg-light-green-text);">COMPLETED ${formatShort(task.completedAt)}</span>`;
+  }
+
+  return `
+    <div class="task-item${isCompleted ? ' completed' : ''}" id="task-${task.id}">
+      <div class="task-item-header" onclick="toggleTask('${task.id}')">
+        <div class="task-check"><span class="check-icon">✓</span></div>
+        <div class="task-title">${escHtml(task.title)}</div>
+        ${isCompleted ? `<span class="task-completed-date">${formatShort(task.completedAt)}</span>` : ''}
+        <span class="task-expand-btn">&#9660;</span>
+      </div>
+      <div class="task-body">${bodyHtml}</div>
+    </div>
+  `;
+}
+
+function toggleTask(id) {
+  const el = document.getElementById('task-' + id);
+  el.classList.toggle('open');
+}
+
+function toggleSection(id) {
+  document.getElementById('section-' + id).classList.toggle('collapsed');
+}
+
+function previewFile(taskId, input) {
+  const file = input.files[0];
+  if (file) document.getElementById('preview-' + taskId).textContent = '📄 ' + file.name;
+}
+
+async function completeTask(taskId) {
+  const task = tasksData.find(t => t.id === taskId);
+  const btn = document.getElementById('btn-' + taskId);
+  btn.disabled = true; btn.textContent = 'Saving';
+
+  const formData = new FormData();
+
+  // Grab file if required
+  if (task.requiresUpload) {
+    const fileInput = document.getElementById('file-' + taskId);
+    if (fileInput && fileInput.files[0]) formData.append('proof', fileInput.files[0]);
+  }
+
+  // Grab credentials if needed
+  if (task.credentialsFields) {
+    const creds = {};
+    let missing = false;
+    task.credentialsFields.forEach(field => {
+      const val = document.getElementById('cred-' + taskId + '-' + field)?.value?.trim();
+      if (!val) missing = true;
+      creds[field] = val;
+    });
+    if (missing) { alert('Please fill in all credential fields.'); btn.disabled=false; btn.textContent='Mark Complete'; return; }
+    formData.append('credentials', JSON.stringify(creds));
+  }
+
+  try {
+    const res = await fetch('/api/tasks/' + taskId + '/complete', {
+      method: 'POST', body: formData, credentials: 'include'
+    });
+    const data = await res.json();
+    if (!res.ok) { alert(data.error || 'Failed to complete task.'); btn.disabled=false; btn.textContent='Mark Complete'; return; }
+    // Update local data and re-render
+    const t = tasksData.find(t => t.id === taskId);
+    t.completed = true;
+    t.completedAt = data.completion.completedAt;
+    t.uploadPath = data.completion.uploadPath;
+    render();
+  } catch { alert('Network error. Please try again.'); btn.disabled=false; btn.textContent='Mark Complete'; }
+}
+
+async function logout() {
+  await fetch('/api/auth/logout', {method:'POST', credentials:'include'});
+  window.location.href = '/';
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function formatShort(d) { if(!d) return ''; try { return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}).toUpperCase(); } catch { return ''; } }
+function formatDate(d) { if(!d) return ''; try { return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch { return d; } }
+function formatDateTime(d) { if(!d) return ''; try { return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}); } catch { return d; } }
+
+init();
+</script>
+</body>
+</html>

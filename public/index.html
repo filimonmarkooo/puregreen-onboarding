@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pure Green | Franchise Onboarding</title>
+<link rel="stylesheet" href="/css/brand.css">
+<link rel="icon" href="/img/logo-mark.svg">
+<style>
+  body { display:flex; flex-direction:column; min-height:100vh; background:var(--pg-offwhite); }
+
+  .bar { display:flex; align-items:center; justify-content:space-between; padding:17px 34px; background:#fff; border-bottom:0.5px solid var(--rule-strong); }
+
+  .split { flex:1; display:grid; grid-template-columns:1.05fr .95fr; }
+  @media(max-width:860px){ .split { grid-template-columns:1fr; } .pitch { padding:44px 26px 34px !important; } }
+
+  .pitch { padding:64px 48px; display:flex; flex-direction:column; justify-content:center; }
+  .pitch h1 { font-family:var(--font-display); font-weight:700; font-size:clamp(48px,7vw,70px); line-height:.86; letter-spacing:.5px; text-transform:uppercase; color:var(--pg-dark-green); margin:16px 0 20px; }
+  .pitch h1 .lt { color:var(--pg-light-green); }
+  .pitch p { font-size:15px; line-height:1.75; color:var(--ink-3); max-width:320px; margin-bottom:30px; }
+
+  .steps { border-top:1px solid var(--rule-strong); padding-top:20px; max-width:340px; }
+  .step { display:flex; gap:15px; padding:10px 0; }
+  .step + .step { border-top:0.5px solid var(--rule); }
+  .step .num { font-family:var(--font-mono); font-size:11px; letter-spacing:1.2px; color:var(--pg-light-green); flex-shrink:0; }
+  .step .txt { font-size:14.5px; color:var(--pg-charcoal); }
+
+  .panel { background:#fff; border-left:0.5px solid var(--rule); padding:56px 46px; display:flex; flex-direction:column; justify-content:center; }
+  @media(max-width:860px){ .panel { border-left:none; border-top:0.5px solid var(--rule); padding:40px 26px; } }
+
+  .tabs { display:flex; border-bottom:1px solid var(--rule); margin-bottom:30px; }
+  .tab { font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-4); background:none; border:none; border-bottom:2px solid transparent; padding:0 0 12px; margin:0 28px -1px 0; cursor:pointer; transition:color .18s; }
+  .tab.active { color:var(--pg-dark-green); border-bottom-color:var(--pg-dark-green); }
+
+  .auth-panel { display:none; }
+  .auth-panel.active { display:block; }
+
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  @media(max-width:520px){ .row2 { grid-template-columns:1fr; gap:0; } }
+
+  .forgot { display:block; text-align:right; font-size:13px; color:var(--ink-3); text-decoration:none; margin:-6px 0 26px; }
+  .forgot:hover { color:var(--pg-dark-green); }
+  .note { font-size:13px; color:var(--ink-3); text-align:center; margin-top:18px; line-height:1.65; }
+
+  footer { background:var(--pg-dark-green); color:rgba(255,255,255,.72); text-align:center; padding:19px; font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; }
+  footer span { color:var(--pg-light-green); }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <a class="pg-logo" href="/">
+    <img src="/img/logo-mark.svg" alt="Pure Green">
+    <span class="pg-logo-text">pure<span>green</span></span>
+  </a>
+  <span class="meta">Franchise Partner Portal</span>
+</div>
+
+<div class="split">
+
+  <div class="pitch">
+    <div class="eyebrow">Onboarding</div>
+    <h1>Build<br>Your<br><span class="lt">Store.</span></h1>
+    <p>Every system your location needs, tracked in one place. Work through it at your own pace and we will see your progress live.</p>
+    <div class="steps">
+      <div class="step"><span class="num">01</span><span class="txt">Register your location</span></div>
+      <div class="step"><span class="num">02</span><span class="txt">Work through your checklist</span></div>
+      <div class="step"><span class="num">03</span><span class="txt">Open your doors</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login')">Sign In</button>
+      <button class="tab" onclick="switchTab('register')">New Location</button>
+    </div>
+
+    <div class="auth-panel active" id="panel-login">
+      <div class="alert alert-error" id="login-error"></div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="login-email" placeholder="you@email.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="login-password" placeholder="Your password" />
+      </div>
+      <a href="/forgot-password.html" class="forgot">Forgot your password?</a>
+      <button class="btn btn-primary btn-full" onclick="handleLogin()" id="login-btn">Sign In</button>
+    </div>
+
+    <div class="auth-panel" id="panel-register">
+      <div class="alert alert-error" id="reg-error"></div>
+      <div class="alert alert-success" id="reg-success"></div>
+      <div class="row2">
+        <div class="form-group">
+          <label class="form-label">Store Name</label>
+          <input class="form-input" type="text" id="reg-storeName" placeholder="Pure Green Newark" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Owner Name</label>
+          <input class="form-input" type="text" id="reg-ownerName" placeholder="Karen Alvarez" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Store Address</label>
+        <input class="form-input" type="text" id="reg-storeAddress" placeholder="88 Market St, Newark NJ" />
+      </div>
+      <div class="row2">
+        <div class="form-group">
+          <label class="form-label">Planned Open Date</label>
+          <input class="form-input" type="date" id="reg-openDate" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="reg-email" placeholder="you@email.com" />
+        </div>
+      </div>
+      <div class="row2">
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" id="reg-password" placeholder="Min 8 characters" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <input class="form-input" type="password" id="reg-confirm" placeholder="Repeat password" />
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="handleRegister()" id="reg-btn">Create Account</button>
+      <p class="note">Your onboarding checklist is ready the moment you register.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>&copy; 2026 <span>Pure Green</span> Franchise &nbsp;&middot;&nbsp; puregreenfranchise.com</footer>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('panel-login').classList.toggle('active', tab==='login');
+  document.getElementById('panel-register').classList.toggle('active', tab==='register');
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideAlerts(...ids) { ids.forEach(id => document.getElementById(id).classList.remove('show')); }
+
+async function handleLogin() {
+  hideAlerts('login-error');
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) return showError('login-error', 'Please enter your email and password.');
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Signing in';
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, password}), credentials: 'include'
+    });
+    const data = await res.json();
+    if (!res.ok) { showError('login-error', data.error || 'Login failed'); btn.disabled=false; btn.textContent='Sign In'; return; }
+    window.location.href = data.redirect;
+  } catch { showError('login-error', 'Network error. Please try again.'); btn.disabled=false; btn.textContent='Sign In'; }
+}
+
+async function handleRegister() {
+  hideAlerts('reg-error','reg-success');
+  const storeName = document.getElementById('reg-storeName').value.trim();
+  const ownerName = document.getElementById('reg-ownerName').value.trim();
+  const storeAddress = document.getElementById('reg-storeAddress').value.trim();
+  const plannedOpenDate = document.getElementById('reg-openDate').value;
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirm = document.getElementById('reg-confirm').value;
+  if (!storeName||!ownerName||!storeAddress||!plannedOpenDate||!email||!password) return showError('reg-error','Please fill in all fields.');
+  if (password.length < 8) return showError('reg-error','Password must be at least 8 characters.');
+  if (password !== confirm) return showError('reg-error','Passwords do not match.');
+  const btn = document.getElementById('reg-btn');
+  btn.disabled = true; btn.textContent = 'Creating account';
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({storeName,ownerName,storeAddress,plannedOpenDate,email,password}), credentials: 'include'
+    });
+    const data = await res.json();
+    if (!res.ok) { showError('reg-error', data.error || 'Registration failed'); btn.disabled=false; btn.textContent='Create Account'; return; }
+    window.location.href = data.redirect;
+  } catch { showError('reg-error','Network error. Please try again.'); btn.disabled=false; btn.textContent='Create Account'; }
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key==='Enter') {
+    if (document.getElementById('panel-login').classList.contains('active')) handleLogin();
+    else handleRegister();
+  }
+});
+
+// Redirect if already logged in
+fetch('/api/auth/me', {credentials:'include'}).then(r=>r.json()).then(d => {
+  if (d.user) window.location.href = d.user.role==='admin' ? '/admin.html' : '/dashboard.html';
+});
+</script>
+</body>
+</html>
