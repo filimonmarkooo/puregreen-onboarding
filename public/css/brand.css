@@ -385,8 +385,11 @@ input[type="date"].form-input { min-height: 44px; }
   border-radius: var(--radius-pill);
 }
 @media (max-width: 768px) {
-  .topnav { padding: 0 18px; }
+  .topnav { padding: 10px 16px; height: auto; min-height: 56px; }
+  .topnav .pg-logo img { height: 22px; }
   .topnav .meta { display: none; }
+  .topnav-right { gap: 8px; flex-wrap: nowrap; }
+  .topnav .btn-sm { padding: 8px 11px; font-size: 9px; }
 }
 
 /* ── Footer strip ────────────────────────────────────────────────── */
