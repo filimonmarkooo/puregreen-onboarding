@@ -3,16 +3,55 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const rateLimit = require('express-rate-limit');
 const { initDB, seedTasksIfEmpty, initReminderTable } = require('./db/postgres');
 const { runReminderCheck } = require('./utils/reminders');
+
+// Required secrets. The app refuses to boot without them rather than falling
+// back to defaults that live in a public repo.
+const REQUIRED_ENV = ['DATABASE_URL', 'JWT_SECRET', 'SEED_SECRET'];
+const missingEnv = REQUIRED_ENV.filter(k => !process.env[k]);
+if (missingEnv.length) {
+  console.error('Missing required environment variables: ' + missingEnv.join(', '));
+  console.error('Set them in Railway -> Variables (see .env.example), then redeploy.');
+  process.exit(1);
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({ origin: true, credentials: true }));
+// Railway terminates TLS at its proxy; trust one hop so req.secure and the
+// rate limiter's client IP are correct.
+app.set('trust proxy', 1);
+
+// CORS: the front-end is served from this same origin, so no other site ever
+// needs credentialed access. Only BASE_URL (if set) is allowed; everything
+// else gets no CORS headers at all.
+const allowedOrigins = [process.env.BASE_URL].filter(Boolean).map(u => u.replace(/\/$/, ''));
+app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : false, credentials: true }));
+
+// Baseline security headers.
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// Secret-gated maintenance endpoints get a tight rate limit.
+const maintenanceLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 10, standardHeaders: 'draft-7', legacyHeaders: false, message: { error: 'Too many requests' } });
+app.use(['/api/run-reminders', '/api/email-test', '/api/admin/seed', '/api/admin/rotate-admin'], maintenanceLimiter);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Uploaded proof files are user-supplied: always download, never render inline.
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Content-Disposition', 'attachment');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/auth', require('./routes/auth'));
@@ -23,7 +62,7 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public/index.html'
 
 // Manual trigger for reminder emails (protected by seed secret)
 app.post('/api/run-reminders', async (req, res) => {
-  if (req.body?.secret !== (process.env.SEED_SECRET || 'puregreenadmin2024'))
+  if (req.body?.secret !== process.env.SEED_SECRET)
     return res.status(403).json({ error: 'Forbidden' });
   const result = await runReminderCheck();
   res.json(result);
@@ -31,7 +70,7 @@ app.post('/api/run-reminders', async (req, res) => {
 
 // Email diagnostics: shows what's configured and sends a live test
 app.post('/api/email-test', async (req, res) => {
-  if (req.body?.secret !== (process.env.SEED_SECRET || 'puregreenadmin2024'))
+  if (req.body?.secret !== process.env.SEED_SECRET)
     return res.status(403).json({ error: 'Forbidden' });
 
   const { sendMail, usingResend, emailConfigured, fromAddress } = require('./utils/sender');
@@ -78,7 +117,7 @@ async function start() {
 
   app.listen(PORT, () => {
     console.log(`\n🟢 Pure Green Onboarding Portal running on http://localhost:${PORT}`);
-    console.log(`   Admin seed: POST /api/admin/seed with { "secret": "puregreenadmin2024" }\n`);
+    console.log(`   Admin seed: POST /api/admin/seed with { "secret": "<SEED_SECRET>" }\n`);
   });
 
   // Checks once a day whether anyone has newly crossed the 30-day or 2-week

@@ -32,14 +32,16 @@ router.get('/franchisees/:id', authMiddleware, adminOnly, async (req, res) => {
 router.post('/seed', async (req, res) => {
   try {
     const { secret } = req.body;
-    if (secret !== (process.env.SEED_SECRET || 'puregreenadmin2024'))
+    if (secret !== process.env.SEED_SECRET)
       return res.status(403).json({ error: 'Forbidden' });
+    if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD)
+      return res.status(400).json({ error: 'ADMIN_EMAIL and ADMIN_PASSWORD must be set in environment variables' });
     const exists = await db.adminExists();
     if (exists) return res.json({ message: 'Admin already exists' });
-    const hash = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'PureGreenAdmin2024!', 10);
+    const hash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
     await db.createUser({
       id: uuidv4(), role: 'admin',
-      email: process.env.ADMIN_EMAIL || 'admin@puregreen.com',
+      email: process.env.ADMIN_EMAIL.toLowerCase(),
       password: hash, storeName: 'Corporate', storeAddress: '',
       ownerName: 'Admin', plannedOpenDate: '',
       createdAt: new Date().toISOString()
@@ -49,7 +51,6 @@ router.post('/seed', async (req, res) => {
   } catch (err) { console.error(err); res.status(500).json({ error: 'Seed failed' }); }
 });
 
-module.exports = router;
 
 // ── Admin Internal Tasks ──────────────────────────────────
 
@@ -347,7 +348,7 @@ router.post('/upcoming/:id/mark-invited', authMiddleware, adminOnly, async (req,
 // the environment, so the new value only ever lives in Railway variables.
 router.post('/rotate-admin', async (req, res) => {
   try {
-    if (req.body?.secret !== (process.env.SEED_SECRET || 'puregreenadmin2024'))
+    if (req.body?.secret !== process.env.SEED_SECRET)
       return res.status(403).json({ error: 'Forbidden' });
 
     const email = process.env.ADMIN_EMAIL;
@@ -374,3 +375,5 @@ router.post('/rotate-admin', async (req, res) => {
     res.status(500).json({ error: 'Failed' });
   }
 });
+
+module.exports = router;

@@ -34,7 +34,7 @@ node server.js
 # 4. Create the admin account (one time only)
 curl -X POST http://localhost:3000/api/admin/seed \
   -H "Content-Type: application/json" \
-  -d '{"secret":"puregreenadmin2024"}'
+  -d '{"secret":"<SEED_SECRET>"}'
 
 # 5. Open in browser
 # Franchisee login: http://localhost:3000
@@ -55,7 +55,7 @@ curl -X POST http://localhost:3000/api/admin/seed \
    ```
    curl -X POST https://your-app.up.railway.app/api/admin/seed \
      -H "Content-Type: application/json" \
-     -d '{"secret":"puregreenadmin2024"}'
+     -d '{"secret":"<SEED_SECRET>"}'
    ```
 
 ---
@@ -92,9 +92,8 @@ They click "New Location", fill out the form, and their dashboard is ready immed
 puregreen-onboarding/
 ├── server.js              # Express entry point
 ├── db/
-│   ├── database.js        # JSON file database
-│   ├── tasks.js           # All 29 task definitions
-│   └── data.json          # Auto-created, stores all data
+│   ├── postgres.js        # All database logic
+│   └── tasks.js           # The 29 default task definitions (seed only)
 ├── routes/
 │   ├── auth.js            # Login, register, reset password
 │   ├── tasks.js           # Task completion, uploads, video URLs
