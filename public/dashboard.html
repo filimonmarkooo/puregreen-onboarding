@@ -3,103 +3,116 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pure Green | My Onboarding</title>
+<title>My Onboarding · Pure Green Franchise</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preload" href="/fonts/AlternateGothicATF-Demi.otf" as="font" type="font/otf" crossorigin>
+<link rel="preload" href="/fonts/GothamRnd-Medium.otf" as="font" type="font/otf" crossorigin>
 <link rel="stylesheet" href="/css/brand.css">
-<link rel="icon" href="/img/logo-mark.svg">
+<link rel="icon" type="image/svg+xml" href="/img/logo-mark.svg">
 <style>
-  body { background: var(--pg-offwhite); }
-  .main { max-width: 940px; margin: 0 auto; padding: 0 32px 90px; }
-  @media(max-width:640px){ .main { padding: 0 18px 70px; } }
+  body { background: var(--pg-canvas); }
+  .main { max-width: 980px; margin: 0 auto; padding: 28px 32px 40px; }
+  @media(max-width:640px){ .main { padding: 18px 18px 30px; } }
 
-  /* Store header */
-  .store-head { background:#fff; margin:0 -32px; padding:44px 32px 30px; border-bottom:0.5px solid var(--rule); }
-  @media(max-width:640px){ .store-head { margin:0 -18px; padding:32px 18px 24px; } }
+  /* Store header: the dark brand band */
+  .store-head { padding: 34px 36px 32px; }
+  @media(max-width:640px){ .store-head { padding: 26px 22px 24px; } }
   .sh-top { display:flex; justify-content:space-between; align-items:flex-end; gap:26px; }
   @media(max-width:640px){ .sh-top { flex-direction:column; align-items:flex-start; gap:18px; } }
-  .store-name { font-family:var(--font-display); font-weight:700; font-size:clamp(38px,6vw,54px); line-height:.87; letter-spacing:.5px; text-transform:uppercase; color:var(--pg-dark-green); }
-  .store-name .lt { color:var(--pg-light-green); }
-  .store-meta { font-size:14px; color:var(--ink-3); margin-top:13px; }
-  .pct-big { font-family:var(--font-display); font-weight:700; font-size:clamp(58px,9vw,84px); line-height:.8; color:var(--pg-dark-green); text-align:right; }
-  .pct-big .sym { font-size:.42em; color:var(--ink-5); }
-  .pct-sub { font-family:var(--font-mono); font-size:10px; letter-spacing:1.6px; color:var(--ink-3); text-align:right; margin-top:6px; }
-  .sh-bar { height:3px; background:var(--rule); margin-top:24px; }
-  .sh-bar > div { height:100%; background:var(--pg-light-green); transition:width .6s ease; }
+  .store-name { font-family:var(--font-display); font-weight:600; font-size:clamp(40px,6vw,60px); line-height:.9; letter-spacing:.005em; text-transform:uppercase; color:#fff; margin-top:16px; }
+  .store-name .lt { color:var(--pg-lime); }
+  .store-meta { font-size:14.5px; color:rgba(255,255,255,.72); margin-top:12px; }
+  .pct-big { font-family:var(--font-display); font-weight:600; font-size:clamp(60px,9vw,92px); line-height:.8; color:var(--pg-lime); text-align:right; }
+  .pct-big .sym { font-size:.42em; color:rgba(255,255,255,.55); }
+  .pct-sub { font-family:var(--font-mono); font-weight:700; font-size:10px; letter-spacing:.16em; color:rgba(255,255,255,.55); text-align:right; margin-top:8px; }
+  @media(max-width:640px){ .pct-big, .pct-sub { text-align:left; } }
+  .sh-bar { height:6px; border-radius:999px; background:rgba(255,255,255,.14); margin-top:26px; overflow:hidden; }
+  .sh-bar > div { height:100%; background:var(--pg-lime); border-radius:999px; transition:width .6s ease; }
 
-  /* Platform section */
-  .platform-section { margin-top:34px; }
-  .platform-header { display:flex; align-items:center; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid var(--rule-strong); cursor:pointer; user-select:none; }
-  .platform-header-left { display:flex; align-items:baseline; gap:14px; }
-  .platform-name { font-family:var(--font-display); font-weight:700; font-size:24px; letter-spacing:.4px; text-transform:uppercase; color:var(--pg-dark-green); }
-  .platform-count { font-family:var(--font-mono); font-size:11px; letter-spacing:1.3px; color:var(--ink-3); }
+  /* Platform section: one white card per platform */
+  .platform-section { margin-top:20px; background:#fff; border:1px solid var(--hairline); border-radius:var(--radius); box-shadow:var(--shadow-card); overflow:hidden; }
+  .platform-header { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 22px; border-bottom:1px solid var(--hairline); cursor:pointer; user-select:none; transition:background .15s; }
+  .platform-header:hover { background:#FAFCF8; }
+  .platform-header-left { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
+  .platform-name { font-family:var(--font-display); font-weight:600; font-size:26px; letter-spacing:.01em; text-transform:uppercase; color:var(--pg-green); line-height:1; }
+  .platform-count { font-family:var(--font-mono); font-weight:700; font-size:10px; letter-spacing:.14em; color:var(--pg-muted); }
   .platform-mini-progress { display:flex; align-items:center; gap:12px; }
-  .platform-pct { font-family:var(--font-mono); font-size:11px; letter-spacing:1.3px; color:var(--pg-light-green-text); }
-  .chevron { font-size:12px; color:var(--ink-5); transition:transform .2s; }
+  .platform-pct { font-family:var(--font-mono); font-weight:700; font-size:10px; letter-spacing:.14em; color:var(--pg-green); background:var(--pg-mint); padding:5px 10px; border-radius:999px; }
+  .chevron { font-size:11px; color:var(--pg-faint); transition:transform .2s; }
   .platform-section.collapsed .chevron { transform:rotate(-90deg); }
   .platform-section.collapsed .task-list { display:none; }
+  .platform-section.collapsed .platform-header { border-bottom-color:transparent; }
 
   /* Tasks */
   .task-list { display:block; }
-  .task-item { background:#fff; border-bottom:0.5px solid var(--rule); border-left:3px solid transparent; transition:border-color .2s; }
-  .task-item.open { border-left-color:var(--pg-dark-green); margin-left:-3px; }
-  .task-item.completed { border-left-color:transparent; }
-  .task-item-header { display:flex; align-items:center; gap:15px; padding:16px 20px; cursor:pointer; }
-  .task-check { width:19px; height:19px; border-radius:50%; border:2px solid #D6DAD8; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:#fff; transition:all .2s; }
-  .task-item.completed .task-check { background:var(--pg-light-green); border-color:var(--pg-light-green); }
-  .check-icon { display:none; color:#fff; font-size:10px; font-weight:700; line-height:1; }
+  .task-item { background:#fff; border-bottom:1px solid var(--hairline); border-left:3px solid transparent; transition:border-color .2s, background .15s; }
+  .task-item:last-child { border-bottom:none; }
+  .task-item.open { border-left-color:var(--pg-lime); background:#FCFDFB; }
+  .task-item-header { display:flex; align-items:center; gap:15px; padding:16px 22px; cursor:pointer; }
+  .task-check { width:20px; height:20px; border-radius:50%; border:2px solid var(--rule-strong); flex-shrink:0; display:flex; align-items:center; justify-content:center; background:#fff; transition:all .2s; }
+  .task-item.completed .task-check { background:var(--pg-lime); border-color:var(--pg-lime); }
+  .check-icon { display:none; color:var(--pg-green-deep); font-size:10px; font-weight:700; line-height:1; }
   .task-item.completed .check-icon { display:block; }
-  .task-title { font-size:15px; font-weight:700; color:var(--pg-charcoal); flex:1; }
-  .task-item.completed .task-title { color:var(--ink-4); text-decoration:line-through; font-weight:400; }
-  .task-completed-date { font-family:var(--font-mono); font-size:10px; letter-spacing:1.1px; color:var(--ink-4); white-space:nowrap; }
-  .task-expand-btn { font-size:11px; color:var(--ink-5); transition:transform .2s; flex-shrink:0; }
+  .task-title { font-size:15px; font-weight:700; color:var(--pg-ink); flex:1; }
+  .task-item.completed .task-title { color:var(--pg-muted); text-decoration:line-through; font-weight:500; }
+  .task-completed-date { font-family:var(--font-mono); font-weight:700; font-size:9.5px; letter-spacing:.12em; color:var(--pg-faint); white-space:nowrap; }
+  .task-expand-btn { font-size:10px; color:var(--pg-faint); transition:transform .2s; flex-shrink:0; }
   .task-item.open .task-expand-btn { transform:rotate(180deg); }
 
-  .task-body { display:none; padding:0 20px 22px 54px; }
+  .task-body { display:none; padding:0 22px 22px 57px; }
+  @media(max-width:640px){ .task-body { padding-left:22px; } }
   .task-item.open .task-body { display:block; }
-  .task-description { font-size:14px; color:var(--ink-3); line-height:1.7; margin-bottom:17px; }
+  .task-description { font-size:14px; color:var(--pg-muted); line-height:1.7; margin-bottom:16px; }
 
-  .video-link { display:inline-flex; align-items:center; gap:7px; background:#F2F8F5; border:1px solid #C3DDD1; color:var(--pg-dark-green); padding:10px 16px; border-radius:3px; font-family:var(--font-mono); font-size:11px; letter-spacing:1.2px; text-transform:uppercase; text-decoration:none; margin-bottom:16px; transition:background .18s; }
-  .video-link:hover { background:#E4F0EA; }
+  .video-link { display:inline-flex; align-items:center; gap:8px; background:var(--pg-mint); color:var(--pg-green); padding:9px 15px; border-radius:999px; font-family:var(--font-mono); font-weight:700; font-size:10px; letter-spacing:.12em; text-transform:uppercase; text-decoration:none; margin-bottom:16px; transition:background .15s; }
+  .video-link:hover { background:#DDEECB; }
 
-  .upload-area { border:1px dashed #D6DAD8; border-radius:4px; padding:24px; text-align:center; cursor:pointer; transition:all .2s; margin-bottom:16px; position:relative; background:#FCFDFC; }
-  .upload-area:hover { border-color:var(--pg-dark-green); background:#F7FBF9; }
+  .upload-area { border:1.5px dashed var(--rule-strong); border-radius:10px; padding:22px; text-align:center; cursor:pointer; transition:all .2s; margin-bottom:16px; position:relative; background:#fff; }
+  .upload-area:hover { border-color:var(--pg-lime); background:#F8FBF3; }
   .upload-area input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
   .upload-icon { display:none; }
-  .upload-text { font-size:13.5px; color:var(--ink-3); }
-  .upload-text strong { color:var(--pg-dark-green); display:block; margin-bottom:4px; font-size:14px; }
-  .upload-preview { font-family:var(--font-mono); font-size:11px; letter-spacing:.9px; color:var(--pg-dark-green); margin-top:8px; }
+  .upload-text { font-size:13.5px; color:var(--pg-muted); }
+  .upload-text strong { color:var(--pg-green); display:block; margin-bottom:3px; font-size:14px; }
+  .upload-preview { font-family:var(--font-mono); font-weight:700; font-size:10px; letter-spacing:.08em; color:var(--pg-green); margin-top:8px; }
 
-  .credentials-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-bottom:18px; }
-  @media(max-width:520px){ .credentials-grid { grid-template-columns:1fr; gap:0; } }
-  .cred-label { font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px; }
+  .credentials-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+  @media(max-width:520px){ .credentials-grid { grid-template-columns:1fr; gap:12px; } }
+  .cred-label { font-family:var(--font-mono); font-weight:700; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--pg-muted); margin-bottom:7px; }
 
-  .complete-btn { background:var(--pg-dark-green); color:#fff; border:none; border-radius:3px; padding:14px 28px; font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; cursor:pointer; transition:background .18s; }
-  .complete-btn:hover { background:#035C30; }
-  .complete-btn:disabled { opacity:.4; cursor:not-allowed; }
+  .complete-btn { background:var(--pg-green); color:#fff; border:none; border-radius:999px; padding:13px 26px; font-family:var(--font-mono); font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:background .15s; }
+  .complete-btn:hover { background:var(--pg-green-deep); }
+  .complete-btn:disabled { opacity:.45; cursor:not-allowed; }
 
-  .proof-link { display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--pg-dark-green); text-decoration:none; margin-bottom:10px; }
+  .proof-link { display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-weight:700; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--pg-green); text-decoration:none; margin-bottom:10px; }
   .proof-link:hover { text-decoration:underline; }
+  .done-note { font-family:var(--font-mono); font-weight:700; font-size:10px; letter-spacing:.12em; color:var(--pg-lime-text); }
 
-  .loading { text-align:center; padding:80px; color:var(--ink-3); font-family:var(--font-mono); font-size:11px; letter-spacing:1.8px; }
-  .spinner { display:block; width:26px; height:26px; border:2px solid var(--rule); border-top-color:var(--pg-dark-green); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 16px; }
+  .loading { text-align:center; padding:80px; color:var(--pg-muted); font-family:var(--font-mono); font-weight:700; font-size:10.5px; letter-spacing:.18em; }
+  .spinner { display:block; width:26px; height:26px; border:2px solid var(--rule); border-top-color:var(--pg-green); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 16px; }
   @keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
 
 <nav class="topnav">
-  <a class="pg-logo" href="/dashboard.html">
-    <img src="/img/logo-mark.svg" alt="Pure Green">
-    <span class="pg-logo-text">pure<span>green</span></span>
-  </a>
-  <div style="display:flex;align-items:center;gap:18px;">
+  <a class="pg-logo" href="/dashboard.html"><img src="/img/pure-green-primary.png" alt="Pure Green" width="155" height="28"></a>
+  <div class="topnav-right">
     <span class="meta" id="user-name">Loading</span>
-    <button class="btn btn-outline btn-sm" onclick="logout()">Sign Out</button>
+    <a class="btn btn-outline btn-sm" href="https://puregreenfranchiseintranet.com/">Intranet</a>
+    <button class="btn btn-dark btn-sm" onclick="logout()">Sign Out</button>
   </div>
 </nav>
 
 <div class="main" id="main">
   <div class="loading"><span class="spinner"></span>LOADING YOUR DASHBOARD</div>
 </div>
+
+<footer class="pg-footer">
+  <a href="https://puregreenfranchiseintranet.com/"><img src="/img/pure-green-primary.png" alt="Pure Green" width="133" height="24"></a>
+  <a href="https://puregreenfranchiseintranet.com/"><span>Franchise Intranet →</span></a>
+  <span>Pure Green Franchise Onboarding Portal · Internal Use Only</span>
+</footer>
+
 
 <script>
 let userData = null;
@@ -163,8 +176,8 @@ function render() {
   const secondLine = parts.length > 1 ? parts.slice(Math.ceil(parts.length/2)).join(' ') : '';
 
   let html = `
-    <div class="store-head">
-      <div class="eyebrow">Your Location</div>
+    <div class="store-head pg-band pg-rise">
+      <span class="pill">Your Location</span>
       <div class="sh-top" style="margin-top:11px">
         <div>
           <div class="store-name">${escHtml(firstLine)}${secondLine ? `<br><span class="lt">${escHtml(secondLine)}</span>` : ''}</div>
@@ -214,7 +227,7 @@ function renderTask(task) {
   let bodyHtml = `<div class="task-description">${escHtml(task.description)}</div>`;
 
   if (hasVideo) {
-    bodyHtml += `<a class="video-link" href="${task.videoUrl}" target="_blank" rel="noopener">🔗 ${escHtml(task.linkLabel || 'Open Link')}</a>`;
+    bodyHtml += `<a class="video-link" href="${escHtml(task.videoUrl)}" target="_blank" rel="noopener">🔗 ${escHtml(task.linkLabel || 'Open Link')}</a>`;
   }
 
   if (!isCompleted) {
@@ -249,9 +262,9 @@ function renderTask(task) {
   } else {
     // Show proof if available
     if (task.uploadPath) {
-      bodyHtml += `<a class="proof-link" href="${task.uploadPath}" target="_blank">View Uploaded Proof</a><br>`;
+      bodyHtml += `<a class="proof-link" href="${escHtml(task.uploadPath)}" target="_blank">View Uploaded Proof</a><br>`;
     }
-    bodyHtml += `<span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1.2px;color:var(--pg-light-green-text);">COMPLETED ${formatShort(task.completedAt)}</span>`;
+    bodyHtml += `<span class="done-note">COMPLETED ${formatShort(task.completedAt)}</span>`;
   }
 
   return `

@@ -7,13 +7,35 @@ const db = require('../db/postgres');
 const { sendNewFranchiseeAlert, sendPasswordResetEmail } = require('../utils/mailer');
 const { sendWelcomeEmail } = require('../utils/reminders');
 
-const SECRET = process.env.JWT_SECRET || 'puregreen-secret-2024';
+const rateLimit = require('express-rate-limit');
 
-router.post('/register', async (req, res) => {
+const SECRET = process.env.JWT_SECRET; // required; server.js exits if unset
+const MIN_PASSWORD = 8;
+
+// Session cookie: httpOnly, same-site, and secure whenever the request came
+// in over HTTPS (Railway terminates TLS at its proxy).
+function cookieOptions(req) {
+  const https = req.secure || req.headers['x-forwarded-proto'] === 'https';
+  return { httpOnly: true, secure: https, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 };
+}
+
+// Brute-force and spam protection on every auth endpoint.
+const limiter = (windowMs, limit, msg) => rateLimit({ windowMs, limit, standardHeaders: 'draft-7', legacyHeaders: false, message: { error: msg } });
+const loginLimiter = limiter(15 * 60 * 1000, 20, 'Too many sign-in attempts. Please wait 15 minutes and try again.');
+const registerLimiter = limiter(60 * 60 * 1000, 10, 'Too many registrations from this network. Please try again later.');
+const resetLimiter = limiter(15 * 60 * 1000, 5, 'Too many reset requests. Please wait 15 minutes and try again.');
+
+function validPassword(password) {
+  return typeof password === 'string' && password.length >= MIN_PASSWORD;
+}
+
+router.post('/register', registerLimiter, async (req, res) => {
   try {
     const { storeName, storeAddress, ownerName, plannedOpenDate, email, password } = req.body;
     if (!storeName || !storeAddress || !ownerName || !plannedOpenDate || !email || !password)
       return res.status(400).json({ error: 'All fields are required' });
+    if (!validPassword(password))
+      return res.status(400).json({ error: `Password must be at least ${MIN_PASSWORD} characters.` });
 
     const existing = await db.getUserByEmail(email);
     if (existing) return res.status(400).json({ error: 'An account with this email already exists' });
@@ -32,7 +54,7 @@ router.post('/register', async (req, res) => {
       .catch(e => console.error('Welcome email failed:', e));
 
     const token = jwt.sign({ id: user.id, role: 'franchisee', email: user.email }, SECRET, { expiresIn: '7d' });
-    res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('token', token, cookieOptions(req));
     res.json({ success: true, redirect: '/dashboard.html' });
   } catch (err) {
     console.error('Register error:', err);
@@ -40,15 +62,17 @@ router.post('/register', async (req, res) => {
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
+    if (typeof email !== 'string' || typeof password !== 'string')
+      return res.status(400).json({ error: 'Invalid email or password' });
     const user = await db.getUserByEmail(email);
     if (!user) return res.status(400).json({ error: 'Invalid email or password' });
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(400).json({ error: 'Invalid email or password' });
     const token = jwt.sign({ id: user.id, role: user.role, email: user.email }, SECRET, { expiresIn: '7d' });
-    res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('token', token, cookieOptions(req));
     res.json({ success: true, redirect: user.role === 'admin' ? '/admin.html' : '/dashboard.html' });
   } catch (err) {
     console.error('Login error:', err);
@@ -61,7 +85,7 @@ router.post('/logout', (req, res) => {
   res.json({ success: true });
 });
 
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', resetLimiter, async (req, res) => {
   try {
     const { email } = req.body;
     const user = await db.getUserByEmail(email);
@@ -77,9 +101,12 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', loginLimiter, async (req, res) => {
   try {
     const { token, password } = req.body;
+    if (!validPassword(password))
+      return res.status(400).json({ error: `Password must be at least ${MIN_PASSWORD} characters.` });
+    if (!token) return res.status(400).json({ error: 'Invalid or expired reset token' });
     const user = await db.getUserByResetToken(token);
     if (!user || new Date(user.resetExpires) < new Date())
       return res.status(400).json({ error: 'Invalid or expired reset token' });

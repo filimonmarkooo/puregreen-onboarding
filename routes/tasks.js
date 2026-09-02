@@ -7,11 +7,31 @@ const db = require('../db/postgres');
 const { authMiddleware, adminOnly } = require('../middleware/auth');
 const { sendTaskCompletionAlert } = require('../utils/mailer');
 
+// Proof uploads: only images, PDFs and Word documents. The stored name is a
+// UUID plus an extension chosen from this map, never from the client's
+// filename (which could carry quotes or an executable extension).
+const ALLOWED_UPLOADS = {
+  'image/jpeg': '.jpg', 'image/png': '.png', 'image/gif': '.gif', 'image/webp': '.webp', 'image/heic': '.heic',
+  'application/pdf': '.pdf', 'application/msword': '.doc',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx'
+};
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, path.join(__dirname, '../public/uploads')),
-  filename: (req, file, cb) => cb(null, uuidv4() + path.extname(file.originalname))
+  filename: (req, file, cb) => cb(null, uuidv4() + ALLOWED_UPLOADS[file.mimetype])
 });
-const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } });
+const upload = multer({
+  storage,
+  limits: { fileSize: 20 * 1024 * 1024, files: 1 },
+  fileFilter: (req, file, cb) => ALLOWED_UPLOADS[file.mimetype]
+    ? cb(null, true)
+    : cb(new Error('Only images, PDFs and Word documents can be uploaded as proof.'))
+});
+// Turn multer errors into a JSON 400 instead of an HTML 500 page.
+const uploadProof = (req, res, next) => upload.single('proof')(req, res, err => {
+  if (!err) return next();
+  const msg = err.code === 'LIMIT_FILE_SIZE' ? 'File is larger than 20 MB.' : err.message;
+  res.status(400).json({ error: msg });
+});
 
 // Franchisee: get all tasks with completion status
 router.get('/', authMiddleware, async (req, res) => {
@@ -26,18 +46,23 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 // Franchisee: complete a task
-router.post('/:taskId/complete', authMiddleware, upload.single('proof'), async (req, res) => {
+router.post('/:taskId/complete', authMiddleware, uploadProof, async (req, res) => {
   try {
     const task = await db.getTaskById(req.params.taskId);
     if (!task) return res.status(404).json({ error: 'Task not found' });
     const existing = await db.getCompletion(req.user.id, req.params.taskId);
     if (existing) return res.status(400).json({ error: 'Task already completed' });
     const user = await db.getUserById(req.user.id);
+    let credentials = null;
+    if (req.body.credentials) {
+      try { credentials = JSON.parse(req.body.credentials); }
+      catch { return res.status(400).json({ error: 'Invalid credentials payload' }); }
+    }
     const completion = {
       id: uuidv4(), userId: req.user.id, taskId: req.params.taskId,
       completedAt: new Date().toISOString(),
       uploadPath: req.file ? `/uploads/${req.file.filename}` : null,
-      credentials: req.body.credentials ? JSON.parse(req.body.credentials) : null
+      credentials
     };
     await db.createCompletion(completion);
     sendTaskCompletionAlert(user, task).catch(e => console.error('Email failed:', e));
