@@ -3,137 +3,213 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pure Green | Franchise Onboarding</title>
+<meta name="robots" content="noindex, nofollow">
+<title>Sign in · Pure Green Franchise Onboarding</title>
+<link rel="preload" href="/fonts/AlternateGothicATF-Demi.otf" as="font" type="font/otf" crossorigin>
+<link rel="preload" href="/fonts/GothamRnd-Medium.otf" as="font" type="font/otf" crossorigin>
 <link rel="stylesheet" href="/css/brand.css">
-<link rel="icon" href="/img/logo-mark.svg">
+<link rel="icon" type="image/svg+xml" href="/img/logo-mark.svg">
 <style>
-  body { display:flex; flex-direction:column; min-height:100vh; background:var(--pg-offwhite); }
+  body { min-height: 100vh; }
 
-  .bar { display:flex; align-items:center; justify-content:space-between; padding:17px 34px; background:#fff; border-bottom:0.5px solid var(--rule-strong); }
+  /* Split layout: brand panel left, form right (intranet sign-in pattern) */
+  .split { display: grid; grid-template-columns: 1fr; min-height: 100vh; }
+  @media (min-width: 900px) { .split { grid-template-columns: 1.05fr .95fr; } }
 
-  .split { flex:1; display:grid; grid-template-columns:1.05fr .95fr; }
-  @media(max-width:860px){ .split { grid-template-columns:1fr; } .pitch { padding:44px 26px 34px !important; } }
+  /* Compact brand bar for phones (the aside is hidden there) */
+  .mobile-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; background: var(--pg-green-deep); }
+  .mobile-bar img { height: 22px; width: auto; }
+  .mobile-bar .meta { color: var(--pg-lime-soft); }
+  @media (min-width: 900px) { .mobile-bar { display: none; } }
 
-  .pitch { padding:64px 48px; display:flex; flex-direction:column; justify-content:center; }
-  .pitch h1 { font-family:var(--font-display); font-weight:700; font-size:clamp(48px,7vw,70px); line-height:.86; letter-spacing:.5px; text-transform:uppercase; color:var(--pg-dark-green); margin:16px 0 20px; }
-  .pitch h1 .lt { color:var(--pg-light-green); }
-  .pitch p { font-size:15px; line-height:1.75; color:var(--ink-3); max-width:320px; margin-bottom:30px; }
+  /* LEFT: deep green brand panel */
+  .pitch {
+    position: relative; overflow: hidden; display: none;
+    background: var(--pg-green-deep); color: #fff;
+    padding: 48px; flex-direction: column; justify-content: space-between;
+  }
+  @media (min-width: 900px) { .pitch { display: flex; } }
+  .pitch::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(120% 100% at 78% 30%, rgba(135,206,33,.28) 0%, rgba(4,51,28,0) 55%),
+      radial-gradient(90% 90% at 10% 90%, rgba(4,106,56,.55) 0%, rgba(4,51,28,0) 60%);
+  }
+  .pitch-leaf { position: absolute; right: -50px; top: 50%; transform: translateY(-50%); height: 440px; width: auto; opacity: .06; pointer-events: none; }
+  .pitch > * { position: relative; }
+  .pitch-logo { height: 26px; width: auto; }
+  .pitch-body { max-width: 460px; }
+  .pitch h1 {
+    font-family: var(--font-display); font-weight: 600; text-transform: uppercase;
+    line-height: .9; letter-spacing: .005em; font-size: clamp(44px, 5.4vw, 76px); color: #fff; margin: 18px 0 18px;
+  }
+  .pitch h1 .lt { color: var(--pg-lime); }
+  .pitch p { font-size: 16px; line-height: 1.6; color: rgba(255,255,255,.72); max-width: 400px; }
 
-  .steps { border-top:1px solid var(--rule-strong); padding-top:20px; max-width:340px; }
-  .step { display:flex; gap:15px; padding:10px 0; }
-  .step + .step { border-top:0.5px solid var(--rule); }
-  .step .num { font-family:var(--font-mono); font-size:11px; letter-spacing:1.2px; color:var(--pg-light-green); flex-shrink:0; }
-  .step .txt { font-size:14.5px; color:var(--pg-charcoal); }
+  /* Numbered steps: the intranet "Step N" tile language */
+  .steps { margin-top: 30px; display: grid; gap: 10px; max-width: 420px; }
+  .step {
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.13);
+    border-radius: var(--radius); padding: 12px 14px;
+  }
+  .step .num {
+    width: 32px; height: 32px; border-radius: 50%; flex: none;
+    background: var(--pg-lime); color: var(--pg-green-deep);
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 1;
+  }
+  .step .txt { font-size: 14.5px; color: #fff; }
+  .step .sub { display: block; font-size: 12px; color: rgba(255,255,255,.55); margin-top: 1px; }
 
-  .panel { background:#fff; border-left:0.5px solid var(--rule); padding:56px 46px; display:flex; flex-direction:column; justify-content:center; }
-  @media(max-width:860px){ .panel { border-left:none; border-top:0.5px solid var(--rule); padding:40px 26px; } }
+  .pitch-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .pitch-foot .meta { color: rgba(255,255,255,.5); }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    font-family: var(--font-mono); font-weight: 700; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--pg-lime-soft); transition: color .15s;
+  }
+  .back-link:hover { color: var(--pg-lime-pale); }
 
-  .tabs { display:flex; border-bottom:1px solid var(--rule); margin-bottom:30px; }
-  .tab { font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-4); background:none; border:none; border-bottom:2px solid transparent; padding:0 0 12px; margin:0 28px -1px 0; cursor:pointer; transition:color .18s; }
-  .tab.active { color:var(--pg-dark-green); border-bottom-color:var(--pg-dark-green); }
+  /* RIGHT: form on canvas */
+  .panel { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--pg-canvas); padding: 40px 22px 56px; }
+  .panel-inner { width: 100%; max-width: 400px; }
+  .panel-card { background: #fff; border: 1px solid var(--hairline); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 30px 30px 26px; }
+  @media (max-width: 520px) { .panel-card { padding: 24px 20px 22px; } }
 
-  .auth-panel { display:none; }
-  .auth-panel.active { display:block; }
+  .tabs { display: inline-flex; gap: 6px; background: var(--pg-mint); padding: 4px; border-radius: var(--radius-pill); margin-bottom: 24px; }
+  .tab {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--pg-green); background: transparent; border: none; border-radius: var(--radius-pill);
+    padding: 9px 16px; cursor: pointer; transition: background .15s, color .15s;
+  }
+  .tab:hover { background: rgba(255,255,255,.7); }
+  .tab.active { background: var(--pg-green-deep); color: var(--pg-lime-soft); }
 
-  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
-  @media(max-width:520px){ .row2 { grid-template-columns:1fr; gap:0; } }
+  .panel h2 { font-family: var(--font-display); font-weight: 600; text-transform: uppercase; font-size: 34px; line-height: 1; color: var(--pg-green); margin: 8px 0 6px; }
+  .panel .lead { font-size: 14px; color: var(--pg-muted); margin-bottom: 22px; }
 
-  .forgot { display:block; text-align:right; font-size:13px; color:var(--ink-3); text-decoration:none; margin:-6px 0 26px; }
-  .forgot:hover { color:var(--pg-dark-green); }
-  .note { font-size:13px; color:var(--ink-3); text-align:center; margin-top:18px; line-height:1.65; }
+  .auth-panel { display: none; }
+  .auth-panel.active { display: block; }
 
-  footer { background:var(--pg-dark-green); color:rgba(255,255,255,.72); text-align:center; padding:19px; font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; }
-  footer span { color:var(--pg-light-green); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 520px) { .row2 { grid-template-columns: 1fr; gap: 0; } }
+
+  .forgot { display: block; text-align: right; font-size: 13px; color: var(--pg-muted); text-decoration: none; margin: -6px 0 22px; }
+  .forgot:hover { color: var(--pg-green); text-decoration: underline; }
+  .note { font-size: 12.5px; color: var(--pg-faint); text-align: center; margin-top: 16px; line-height: 1.6; }
+  .help { text-align: center; font-size: 12px; color: var(--pg-faint); margin-top: 20px; line-height: 1.6; }
+  .help a { color: var(--pg-green); text-decoration: none; font-weight: 700; }
 </style>
 </head>
 <body>
 
-<div class="bar">
-  <a class="pg-logo" href="/">
-    <img src="/img/logo-mark.svg" alt="Pure Green">
-    <span class="pg-logo-text">pure<span>green</span></span>
-  </a>
-  <span class="meta">Franchise Partner Portal</span>
-</div>
-
 <div class="split">
 
-  <div class="pitch">
-    <div class="eyebrow">Onboarding</div>
-    <h1>Build<br>Your<br><span class="lt">Store.</span></h1>
-    <p>Every system your location needs, tracked in one place. Work through it at your own pace and we will see your progress live.</p>
-    <div class="steps">
-      <div class="step"><span class="num">01</span><span class="txt">Register your location</span></div>
-      <div class="step"><span class="num">02</span><span class="txt">Work through your checklist</span></div>
-      <div class="step"><span class="num">03</span><span class="txt">Open your doors</span></div>
-    </div>
+  <!-- Phones: slim brand bar (the full panel is hidden under 900px) -->
+  <div class="mobile-bar">
+    <a href="/"><img src="/img/pure-green-white.svg" alt="Pure Green"></a>
+    <span class="meta">Onboarding Portal</span>
   </div>
 
-  <div class="panel">
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('login')">Sign In</button>
-      <button class="tab" onclick="switchTab('register')">New Location</button>
+  <!-- LEFT: brand panel -->
+  <aside class="pitch">
+    <img src="/img/logo-mark.svg" alt="" class="pitch-leaf" aria-hidden="true">
+    <img src="/img/pure-green-white.svg" alt="Pure Green" class="pitch-logo" width="200" height="36">
+
+    <div class="pitch-body">
+      <div class="eyebrow eyebrow--lime">Franchise Onboarding Portal</div>
+      <h1>Build<br>your<br><span class="lt">store.</span></h1>
+      <p>Every platform your location needs, set up and tracked in one place. Work through it at your own pace and the Pure Green team sees your progress live.</p>
+      <div class="steps">
+        <div class="step"><span class="num">1</span><span class="txt">Register your location<span class="sub">Store name, address and planned open date</span></span></div>
+        <div class="step"><span class="num">2</span><span class="txt">Work through your checklist<span class="sub">Square, Uber Eats, DoorDash, Grubhub and Stream</span></span></div>
+        <div class="step"><span class="num">3</span><span class="txt">Open your doors<span class="sub">Every system live before day one</span></span></div>
+      </div>
     </div>
 
-    <div class="auth-panel active" id="panel-login">
-      <div class="alert alert-error" id="login-error"></div>
-      <div class="form-group">
-        <label class="form-label">Email</label>
-        <input class="form-input" type="email" id="login-email" placeholder="you@email.com" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <input class="form-input" type="password" id="login-password" placeholder="Your password" />
-      </div>
-      <a href="/forgot-password.html" class="forgot">Forgot your password?</a>
-      <button class="btn btn-primary btn-full" onclick="handleLogin()" id="login-btn">Sign In</button>
+    <div class="pitch-foot">
+      <span class="meta">Confidential · Active franchise partners only</span>
+      <a class="back-link" href="https://puregreenfranchiseintranet.com/">← Franchise Intranet</a>
     </div>
+  </aside>
 
-    <div class="auth-panel" id="panel-register">
-      <div class="alert alert-error" id="reg-error"></div>
-      <div class="alert alert-success" id="reg-success"></div>
-      <div class="row2">
-        <div class="form-group">
-          <label class="form-label">Store Name</label>
-          <input class="form-input" type="text" id="reg-storeName" placeholder="Pure Green Newark" />
+  <!-- RIGHT: sign in / register -->
+  <section class="panel">
+    <div class="panel-inner pg-rise">
+      <div class="panel-card">
+        <div class="tabs" role="tablist">
+          <button class="tab active" role="tab" onclick="switchTab('login')">Sign In</button>
+          <button class="tab" role="tab" onclick="switchTab('register')">New Location</button>
         </div>
-        <div class="form-group">
-          <label class="form-label">Owner Name</label>
-          <input class="form-input" type="text" id="reg-ownerName" placeholder="Karen Alvarez" />
+
+        <div class="auth-panel active" id="panel-login">
+          <div class="eyebrow">Welcome back</div>
+          <h2>Sign in</h2>
+          <p class="lead">Use the email you registered your location with.</p>
+          <div class="alert alert-error" id="login-error"></div>
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email</label>
+            <input class="form-input" type="email" id="login-email" placeholder="you@email.com" autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <input class="form-input" type="password" id="login-password" placeholder="Your password" autocomplete="current-password" />
+          </div>
+          <a href="/forgot-password.html" class="forgot">Forgot your password?</a>
+          <button class="btn btn-primary btn-full" onclick="handleLogin()" id="login-btn">Sign In</button>
+        </div>
+
+        <div class="auth-panel" id="panel-register">
+          <div class="eyebrow">New location</div>
+          <h2>Register your store</h2>
+          <p class="lead">Your onboarding checklist is ready the moment you register.</p>
+          <div class="alert alert-error" id="reg-error"></div>
+          <div class="alert alert-success" id="reg-success"></div>
+          <div class="row2">
+            <div class="form-group">
+              <label class="form-label" for="reg-storeName">Store Name</label>
+              <input class="form-input" type="text" id="reg-storeName" placeholder="Pure Green Newark" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-ownerName">Owner Name</label>
+              <input class="form-input" type="text" id="reg-ownerName" placeholder="Karen Alvarez" autocomplete="name" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-storeAddress">Store Address</label>
+            <input class="form-input" type="text" id="reg-storeAddress" placeholder="88 Market St, Newark NJ" autocomplete="street-address" />
+          </div>
+          <div class="row2">
+            <div class="form-group">
+              <label class="form-label" for="reg-openDate">Planned Open Date</label>
+              <input class="form-input" type="date" id="reg-openDate" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-email">Email</label>
+              <input class="form-input" type="email" id="reg-email" placeholder="you@email.com" autocomplete="email" />
+            </div>
+          </div>
+          <div class="row2">
+            <div class="form-group">
+              <label class="form-label" for="reg-password">Password</label>
+              <input class="form-input" type="password" id="reg-password" placeholder="Min 8 characters" autocomplete="new-password" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-confirm">Confirm Password</label>
+              <input class="form-input" type="password" id="reg-confirm" placeholder="Repeat password" autocomplete="new-password" />
+            </div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="handleRegister()" id="reg-btn">Create Account</button>
+          <p class="note">One account per location. Your progress saves as you go.</p>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Store Address</label>
-        <input class="form-input" type="text" id="reg-storeAddress" placeholder="88 Market St, Newark NJ" />
-      </div>
-      <div class="row2">
-        <div class="form-group">
-          <label class="form-label">Planned Open Date</label>
-          <input class="form-input" type="date" id="reg-openDate" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input class="form-input" type="email" id="reg-email" placeholder="you@email.com" />
-        </div>
-      </div>
-      <div class="row2">
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input class="form-input" type="password" id="reg-password" placeholder="Min 8 characters" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Confirm Password</label>
-          <input class="form-input" type="password" id="reg-confirm" placeholder="Repeat password" />
-        </div>
-      </div>
-      <button class="btn btn-primary btn-full" onclick="handleRegister()" id="reg-btn">Create Account</button>
-      <p class="note">Your onboarding checklist is ready the moment you register.</p>
+
+      <p class="help">Need help? Contact your Pure Green franchise support team or head back to the <a href="https://puregreenfranchiseintranet.com/">Franchise Intranet</a>.</p>
     </div>
-  </div>
+  </section>
 
 </div>
-
-<footer>&copy; 2026 <span>Pure Green</span> Franchise &nbsp;&middot;&nbsp; puregreenfranchise.com</footer>
 
 <script>
 function switchTab(tab) {
