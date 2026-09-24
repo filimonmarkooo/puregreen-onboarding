@@ -96,3 +96,36 @@ async function sendPasswordResetEmail(email, resetUrl) {
 }
 
 module.exports = { sendNewFranchiseeAlert, sendTaskCompletionAlert, sendPasswordResetEmail };
+
+
+// Sent to the corporate team whenever a location's planned open date changes
+async function sendOpenDateChangeAlert(user, oldDate, newDate, changedBy) {
+  if (!emailConfigured()) return;
+  const fmt = d => d ? new Date(String(d).split('T')[0] + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Not set';
+  await sendMail({
+    to: ADMIN_EMAILS,
+    subject: `📅 Open Date Changed: ${user.storeName}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: #046A38; padding: 24px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">pure<span style="color: #87CE21;">green</span></h1>
+          <p style="color: #87CE21; margin: 8px 0 0; font-size: 13px; letter-spacing: 2px;">FRANCHISE ONBOARDING</p>
+        </div>
+        <div style="background: #f9f9f9; padding: 32px;">
+          <h2 style="color: #046A38; margin-top: 0;">Planned Open Date Changed</h2>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr><td style="padding: 8px 0; color: #666; width: 160px;"><strong>Store</strong></td><td style="padding: 8px 0; color: #333;">${user.storeName}</td></tr>
+            <tr><td style="padding: 8px 0; color: #666;"><strong>Owner</strong></td><td style="padding: 8px 0; color: #333;">${user.ownerName}</td></tr>
+            <tr><td style="padding: 8px 0; color: #666;"><strong>Previous Date</strong></td><td style="padding: 8px 0; color: #333;">${fmt(oldDate)}</td></tr>
+            <tr><td style="padding: 8px 0; color: #666;"><strong>New Date</strong></td><td style="padding: 8px 0; color: #046A38; font-weight: bold;">${fmt(newDate)}</td></tr>
+            <tr><td style="padding: 8px 0; color: #666;"><strong>Changed By</strong></td><td style="padding: 8px 0; color: #333;">${changedBy}</td></tr>
+          </table>
+          <div style="margin-top: 24px;">
+            <a href="${process.env.BASE_URL || 'http://localhost:3000'}/admin.html" style="background: #046A38; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">View in Admin Dashboard</a>
+          </div>
+        </div>
+      </div>
+    `
+  });
+}
+module.exports.sendOpenDateChangeAlert = sendOpenDateChangeAlert;

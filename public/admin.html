@@ -546,6 +546,55 @@ function renderFranchisees() {
   }).join('');
 }
 
+let editingFranchiseeId = null;
+
+function editFranchisee(id) {
+  const f = allFranchisees.find(x => x.id === id);
+  if (!f) return;
+  editingFranchiseeId = id;
+  document.getElementById('fr-storeName').value = f.storeName || '';
+  document.getElementById('fr-storeAddress').value = f.storeAddress || '';
+  document.getElementById('fr-ownerName').value = f.ownerName || '';
+  document.getElementById('fr-openDate').value = (f.plannedOpenDate || '').split('T')[0];
+  document.getElementById('fr-modal-error').classList.remove('show');
+  document.getElementById('franchisee-modal').classList.add('show');
+}
+
+function closeFranchiseeModal() {
+  document.getElementById('franchisee-modal').classList.remove('show');
+  editingFranchiseeId = null;
+}
+
+async function saveFranchisee() {
+  const id = editingFranchiseeId;
+  const err = document.getElementById('fr-modal-error');
+  const btn = document.getElementById('fr-save-btn');
+  const payload = {
+    storeName: document.getElementById('fr-storeName').value.trim(),
+    storeAddress: document.getElementById('fr-storeAddress').value.trim(),
+    ownerName: document.getElementById('fr-ownerName').value.trim(),
+    plannedOpenDate: document.getElementById('fr-openDate').value
+  };
+  if (!payload.storeName || !payload.storeAddress || !payload.ownerName || !payload.plannedOpenDate) {
+    err.textContent = 'Please fill in every field.'; err.classList.add('show'); return;
+  }
+  btn.disabled = true; btn.textContent = 'Saving';
+  try {
+    const res = await fetch('/api/admin/franchisees/' + id, {
+      method: 'PATCH', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload), credentials: 'include'
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.error || 'Failed to save changes');
+    closeFranchiseeModal();
+    await loadData();
+    if (document.getElementById('fc-' + id)) toggleFranchisee(id);
+  } catch (e) {
+    err.textContent = e.message; err.classList.add('show');
+  }
+  btn.disabled = false; btn.textContent = 'Save Changes';
+}
+
 async function deleteFranchisee(id, name) {
   if (!confirm(`Delete "${name}"?\n\nThis permanently removes their account, all task progress, uploaded proof records, and internal admin notes. This cannot be undone.`)) return;
   if (!confirm(`Last check. Really delete "${name}"?`)) return;
@@ -650,6 +699,7 @@ async function loadFranchiseeDetail(id) {
   </div>
 
   <div class="up-actions">
+    <button class="btn btn-outline btn-sm" onclick="editFranchisee('${id}')">Edit Details</button>
     <button class="btn-del" onclick="deleteFranchisee('${id}', '${escHtml(f.storeName).replace(/'/g,"\\'")}')">Delete This Location</button>
   </div>`;
 
@@ -1502,6 +1552,39 @@ init();
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeUpcomingModal()">Cancel</button>
       <button class="btn btn-primary" id="up-save-btn" onclick="saveUpcomingLocation()">Add Location</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT ACTIVE LOCATION MODAL -->
+<div class="modal-overlay" id="franchisee-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeFranchiseeModal()" aria-label="Close">&#10005;</button>
+    <div class="modal-title">Edit Location</div>
+    <div class="modal-body">
+    <div class="alert alert-error" id="fr-modal-error"></div>
+    <div class="form-group">
+      <label class="form-label">Store Name *</label>
+      <input class="form-input" type="text" id="fr-storeName" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Store Address *</label>
+      <input class="form-input" type="text" id="fr-storeAddress" />
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-group">
+        <label class="form-label">Owner Name *</label>
+        <input class="form-input" type="text" id="fr-ownerName" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Planned Open Date *</label>
+        <input class="form-input" type="date" id="fr-openDate" />
+      </div>
+    </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeFranchiseeModal()">Cancel</button>
+      <button class="btn btn-primary" id="fr-save-btn" onclick="saveFranchisee()">Save Changes</button>
     </div>
   </div>
 </div>

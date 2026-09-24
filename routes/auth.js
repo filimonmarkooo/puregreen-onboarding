@@ -6,6 +6,8 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../db/postgres');
 const { sendNewFranchiseeAlert, sendPasswordResetEmail } = require('../utils/mailer');
 const { sendWelcomeEmail } = require('../utils/reminders');
+const { authMiddleware } = require('../middleware/auth');
+const { validDate, applyLocationUpdate } = require('../utils/openDate');
 
 const SECRET = process.env.JWT_SECRET || 'puregreen-secret-2024';
 
@@ -103,6 +105,21 @@ router.get('/me', (req, res) => {
     });
   } catch {
     res.json({ user: null });
+  }
+});
+
+// Franchisee changes their own planned open date
+router.patch('/me/open-date', authMiddleware, async (req, res) => {
+  try {
+    const { plannedOpenDate } = req.body || {};
+    if (!validDate(plannedOpenDate)) return res.status(400).json({ error: 'Please choose a valid date' });
+    const user = await db.getUserById(req.user.id);
+    if (!user || user.role !== 'franchisee') return res.status(403).json({ error: 'Not allowed' });
+    const updated = await applyLocationUpdate(user, { plannedOpenDate }, `${user.ownerName} (franchisee)`);
+    res.json({ success: true, plannedOpenDate: updated.plannedOpenDate });
+  } catch (err) {
+    console.error('Open date update error:', err);
+    res.status(500).json({ error: 'Could not save the new date' });
   }
 });
 

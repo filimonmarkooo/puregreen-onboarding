@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db/postgres');
 const { authMiddleware, adminOnly } = require('../middleware/auth');
+const { validDate, applyLocationUpdate } = require('../utils/openDate');
 
 router.get('/franchisees', authMiddleware, adminOnly, async (req, res) => {
   try {
@@ -27,6 +28,30 @@ router.get('/franchisees/:id', authMiddleware, adminOnly, async (req, res) => {
     const { password, resetToken, resetExpires, ...safe } = user;
     res.json(safe);
   } catch (err) { res.status(500).json({ error: 'Failed' }); }
+});
+
+// Admin edits a registered location's details
+router.patch('/franchisees/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const user = await db.getUserById(req.params.id);
+    if (!user || user.role !== 'franchisee') return res.status(404).json({ error: 'Location not found' });
+    const b = req.body || {};
+    const fields = {};
+    for (const key of ['storeName', 'storeAddress', 'ownerName']) {
+      if (b[key] !== undefined) {
+        const v = String(b[key]).trim();
+        if (!v) return res.status(400).json({ error: 'Store name, address and owner cannot be blank' });
+        fields[key] = v.slice(0, 200);
+      }
+    }
+    if (b.plannedOpenDate !== undefined) {
+      if (!validDate(b.plannedOpenDate)) return res.status(400).json({ error: 'Please choose a valid open date' });
+      fields.plannedOpenDate = b.plannedOpenDate;
+    }
+    const updated = await applyLocationUpdate(user, fields, req.user.email);
+    const { password, resetToken, resetExpires, ...safe } = updated;
+    res.json({ success: true, franchisee: safe });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to save changes' }); }
 });
 
 router.post('/seed', async (req, res) => {

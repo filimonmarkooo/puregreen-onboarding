@@ -408,3 +408,30 @@ async function resetAdminPassword(email, hash) {
   return rowCount;
 }
 module.exports.resetAdminPassword = resetAdminPassword;
+
+
+// ── Edit a registered location's details ──────────────────
+// Only the fields passed in are changed. If the open date changes, any
+// pipeline entry linked to this account is moved to the same date so the
+// calendar stays in sync.
+async function updateFranchiseeDetails(id, fields) {
+  const map = { storeName: 'store_name', storeAddress: 'store_address', ownerName: 'owner_name', plannedOpenDate: 'planned_open_date' };
+  const sets = []; const vals = []; let i = 1;
+  for (const [key, col] of Object.entries(map)) {
+    if (fields[key] !== undefined) { sets.push(`${col}=$${i++}`); vals.push(fields[key]); }
+  }
+  if (!sets.length) return;
+  vals.push(id);
+  await pool.query(`UPDATE users SET ${sets.join(', ')} WHERE id=$${i} AND role='franchisee'`, vals);
+  if (fields.plannedOpenDate !== undefined) {
+    await pool.query('UPDATE upcoming_locations SET planned_open_date=$1 WHERE linked_user_id=$2', [fields.plannedOpenDate, id]);
+  }
+}
+
+// Lets the 30 day and 2 week emails fire again after an opening is pushed back
+async function clearReminders(userId) {
+  await pool.query('DELETE FROM reminder_log WHERE user_id=$1', [userId]);
+}
+
+module.exports.updateFranchiseeDetails = updateFranchiseeDetails;
+module.exports.clearReminders = clearReminders;

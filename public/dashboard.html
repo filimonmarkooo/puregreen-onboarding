@@ -19,6 +19,14 @@
   .store-name { font-family:var(--font-display); font-weight:700; font-size:clamp(38px,6vw,54px); line-height:.87; letter-spacing:.5px; text-transform:uppercase; color:var(--pg-dark-green); }
   .store-name .lt { color:var(--pg-light-green); }
   .store-meta { font-size:14px; color:var(--ink-3); margin-top:13px; }
+  .date-change { background:none; border:none; padding:0; margin-left:10px; font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--pg-dark-green); cursor:pointer; }
+  .date-change:hover { text-decoration:underline; }
+  .date-edit { display:none; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap; }
+  .date-edit.show { display:flex; }
+  .date-edit input { max-width:180px; }
+  .date-msg { font-size:13px; margin-top:8px; }
+  .date-msg.err { color:var(--st-red); }
+  .date-msg.ok { color:var(--pg-dark-green); }
   .pct-big { font-family:var(--font-display); font-weight:700; font-size:clamp(58px,9vw,84px); line-height:.8; color:var(--pg-dark-green); text-align:right; }
   .pct-big .sym { font-size:.42em; color:var(--ink-5); }
   .pct-sub { font-family:var(--font-mono); font-size:10px; letter-spacing:1.6px; color:var(--ink-3); text-align:right; margin-top:6px; }
@@ -124,6 +132,38 @@ const PLATFORM_COLORS = {
   'Stream': 'badge-stream'
 };
 
+function openDateEdit() {
+  document.getElementById('date-edit').classList.add('show');
+  document.getElementById('date-msg').textContent = '';
+  document.getElementById('new-open-date').focus();
+}
+function closeDateEdit() {
+  document.getElementById('date-edit').classList.remove('show');
+  document.getElementById('date-msg').textContent = '';
+}
+async function saveOpenDate() {
+  const val = document.getElementById('new-open-date').value;
+  const msg = document.getElementById('date-msg');
+  const btn = document.getElementById('date-save');
+  if (!val) { msg.className = 'date-msg err'; msg.textContent = 'Please choose a date.'; return; }
+  btn.disabled = true; btn.textContent = 'Saving';
+  try {
+    const res = await fetch('/api/auth/me/open-date', {
+      method: 'PATCH', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ plannedOpenDate: val }), credentials: 'include'
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.error || 'Could not save the new date');
+    userData.plannedOpenDate = d.plannedOpenDate;
+    render();
+    const m = document.getElementById('date-msg');
+    m.className = 'date-msg ok'; m.textContent = 'Open date updated. The Pure Green team has been notified.';
+  } catch (e) {
+    msg.className = 'date-msg err'; msg.textContent = e.message;
+    btn.disabled = false; btn.textContent = 'Save';
+  }
+}
+
 async function init() {
   const me = await fetch('/api/auth/me', {credentials:'include'}).then(r=>r.json());
   if (!me.user) return window.location.href = '/';
@@ -168,7 +208,13 @@ function render() {
       <div class="sh-top" style="margin-top:11px">
         <div>
           <div class="store-name">${escHtml(firstLine)}${secondLine ? `<br><span class="lt">${escHtml(secondLine)}</span>` : ''}</div>
-          <div class="store-meta">${escHtml(userData.ownerName)} &nbsp;&middot;&nbsp; Opens ${formatDate(userData.plannedOpenDate)}</div>
+          <div class="store-meta">${escHtml(userData.ownerName)} &nbsp;&middot;&nbsp; Opens ${formatDate(userData.plannedOpenDate)}<button class="date-change" onclick="openDateEdit()">Change Date</button></div>
+          <div class="date-edit" id="date-edit">
+            <input class="form-input" type="date" id="new-open-date" value="${escHtml((userData.plannedOpenDate || '').split('T')[0])}" />
+            <button class="btn btn-primary btn-sm" id="date-save" onclick="saveOpenDate()">Save</button>
+            <button class="btn btn-outline btn-sm" onclick="closeDateEdit()">Cancel</button>
+          </div>
+          <div class="date-msg" id="date-msg"></div>
         </div>
         <div>
           <div class="pct-big">${pct}<span class="sym">%</span></div>
